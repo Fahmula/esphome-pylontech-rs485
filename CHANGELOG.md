@@ -1,3 +1,10 @@
+# [1.0.0-rc.2](https://github.com/Fahmula/esphome-pylontech-rs485/compare/v1.0.0-rc.1...v1.0.0-rc.2) (2025-07-07)
+
+
+### Bug Fixes
+
+* **init.py:** Move CONF_STATE_OF_CHARGE definition ([c7282fa](https://github.com/Fahmula/esphome-pylontech-rs485/commit/c7282fa43fcf470bdc68e42954ae703f0231a870))
+
 # 1.0.0-rc.1 (2025-07-07)
 
 
