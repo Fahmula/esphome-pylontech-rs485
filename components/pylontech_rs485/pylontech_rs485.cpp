@@ -1,5 +1,6 @@
 #include "pylontech_rs485.h"
 #include "esphome/core/log.h"
+#include "esphome/components/uart/uart_component.h"
 
 namespace esphome {
 namespace pylontech_rs485 {
@@ -65,8 +66,8 @@ void PylontechRS485::loop() {
 
 bool PylontechRS485::update_state_from_sensors_() {
   // Check if all required sensors have a valid state (are not NaN)
-  if (isnan(this->soc_sensor_->state) || isnan(this->voltage_sensor_->state) ||
-      isnan(this->current_sensor_->state) || isnan(this->temperature_sensor_->state)) {
+  if (std::isnan(this->soc_sensor_->state) || std::isnan(this->voltage_sensor_->state) ||
+      std::isnan(this->current_sensor_->state) || std::isnan(this->temperature_sensor_->state)) {
     return false; // At least one sensor is not ready
   }
 
