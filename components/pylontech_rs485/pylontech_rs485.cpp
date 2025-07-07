@@ -16,15 +16,14 @@ void PylontechRS485::dump_config() {
   // LOG_UART_DEVICE(this);
   ESP_LOGCONFIG(TAG, "  UART Bus is configured."); // Add a simple replacement log
   ESP_LOGCONFIG(TAG, "  Update Timeout: %u ms", this->update_timeout_ms_);
-  // All sensors and limits are now required, so no need to check for nullptr
   LOG_SENSOR("  ", "SoC Sensor", this->soc_sensor_);
   LOG_SENSOR("  ", "Voltage Sensor", this->voltage_sensor_);
   LOG_SENSOR("  ", "Current Sensor", this->current_sensor_);
   LOG_SENSOR("  ", "Temperature Sensor", this->temperature_sensor_);
-  ESP_LOGCONFIG(TAG, "  Max Charge Voltage: %.1fV", this->max_charge_v_mv_ / 1000.0f);
-  ESP_LOGCONFIG(TAG, "  Min Discharge Voltage: %.1fV", this->min_discharge_v_mv_ / 1000.0f);
-  ESP_LOGCONFIG(TAG, "  Max Charge Current: %.1fA", this->max_charge_i_ca_ / 100.0f);
-  ESP_LOGCONFIG(TAG, "  Max Discharge Current: %.1fA", this->max_discharge_i_ca_ / 100.0f);
+  LOG_SENSOR("  ", "Max Voltage Sensor", this->max_voltage_sensor_);
+  LOG_SENSOR("  ", "Min Voltage Sensor", this->min_voltage_sensor_);
+  LOG_SENSOR("  ", "Max Charge Current Sensor", this->max_charge_current_sensor_);
+  LOG_SENSOR("  ", "Max Discharge Current Sensor", this->max_discharge_current_sensor_);
 }
 
 float PylontechRS485::get_setup_priority() const { return setup_priority::LATE; }
@@ -68,15 +67,25 @@ void PylontechRS485::loop() {
 bool PylontechRS485::update_state_from_sensors_() {
   // Check if all required sensors have a valid state (are not NaN)
   if (std::isnan(this->soc_sensor_->state) || std::isnan(this->voltage_sensor_->state) ||
-      std::isnan(this->current_sensor_->state) || std::isnan(this->temperature_sensor_->state)) {
+      std::isnan(this->current_sensor_->state) || std::isnan(this->temperature_sensor_->state) ||
+      std::isnan(this->max_voltage_sensor_->state) || std::isnan(this->min_voltage_sensor_->state) ||
+      std::isnan(this->max_charge_current_sensor_->state) || std::isnan(this->max_discharge_current_sensor_->state)) {
     return false; // At least one sensor is not ready
   }
 
+  // All sensors are valid, update member variables
   // All sensors are valid, update member variables
   this->soc_percent_ = this->soc_sensor_->state;
   this->voltage_mv_ = this->voltage_sensor_->state * 1000;
   this->current_ca_ = this->current_sensor_->state * 100;
   this->temp_deci_k_ = (this->temperature_sensor_->state + 273.15) * 10;
+  
+  // Update limits from their sensors
+  this->max_charge_v_mv_ = this->max_voltage_sensor_->state * 1000;
+  this->min_discharge_v_mv_ = this->min_voltage_sensor_->state * 1000;
+  this->max_charge_i_ca_ = this->max_charge_current_sensor_->state * 100;
+  this->max_discharge_i_ca_ = this->max_discharge_current_sensor_->state * 100;
+  
   return true;
 }
 

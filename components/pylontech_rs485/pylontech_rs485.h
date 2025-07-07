@@ -22,11 +22,11 @@ class PylontechRS485 : public Component, public uart::UARTDevice {
   void set_current_sensor(sensor::Sensor *sensor) { this->current_sensor_ = sensor; }
   void set_temperature_sensor(sensor::Sensor *sensor) { this->temperature_sensor_ = sensor; }
 
-  // Setters for required limits
-  void set_max_charge_voltage(float voltage) { this->max_charge_v_mv_ = voltage * 1000; }
-  void set_min_discharge_voltage(float voltage) { this->min_discharge_v_mv_ = voltage * 1000; }
-  void set_max_charge_current(float current) { this->max_charge_i_ca_ = current * 100; }
-  void set_max_discharge_current(float current) { this->max_discharge_i_ca_ = current * 100; }
+   // Setters for dynamic limits
+  void set_max_voltage_sensor(sensor::Sensor *sensor) { this->max_voltage_sensor_ = sensor; }
+  void set_min_voltage_sensor(sensor::Sensor *sensor) { this->min_voltage_sensor_ = sensor; }
+  void set_max_charge_current_sensor(sensor::Sensor *sensor) { this->max_charge_current_sensor_ = sensor; }
+  void set_max_discharge_current_sensor(sensor::Sensor *sensor) { this->max_discharge_current_sensor_ = sensor; }
 
   // Setter for the update timeout
   void set_update_timeout(uint32_t timeout_ms) { this->update_timeout_ms_ = timeout_ms; }
@@ -37,15 +37,17 @@ class PylontechRS485 : public Component, public uart::UARTDevice {
   sensor::Sensor *voltage_sensor_;
   sensor::Sensor *current_sensor_;
   sensor::Sensor *temperature_sensor_;
+  sensor::Sensor *max_voltage_sensor_;
+  sensor::Sensor *min_voltage_sensor_;
+  sensor::Sensor *max_charge_current_sensor_;
+  sensor::Sensor *max_discharge_current_sensor_;
 
-  // Member variables to hold the battery state.
+  // Member variables to hold the live battery state and limits
   // Initialized to 0, requires live sensor data to operate.
   uint16_t voltage_mv_{0};
   int16_t current_ca_{0};
   uint8_t soc_percent_{0};
   uint16_t temp_deci_k_{0};
-
-  // Member variables for required battery limits
   uint16_t max_charge_v_mv_{0};
   uint16_t min_discharge_v_mv_{0};
   uint16_t max_charge_i_ca_{0};

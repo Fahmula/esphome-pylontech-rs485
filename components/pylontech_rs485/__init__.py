@@ -18,7 +18,7 @@ PylontechRS485 = pylontech_rs485_ns.class_(
     "PylontechRS485", cg.Component, uart.UARTDevice
 )
 
-# Define custom keys for concepts that are not in esphome.const
+# Define all component-specific keys here.
 CONF_STATE_OF_CHARGE = "state_of_charge"
 CONF_MAX_VOLTAGE = "max_voltage"
 CONF_MIN_VOLTAGE = "min_voltage"
@@ -37,11 +37,11 @@ CONFIG_SCHEMA = (
             cv.Required(CONF_CURRENT): cv.use_id(sensor.Sensor),
             cv.Required(CONF_TEMPERATURE): cv.use_id(sensor.Sensor),
             
-            # Configurable battery limits (REQUIRED)
-            cv.Required(CONF_MAX_VOLTAGE): cv.voltage,
-            cv.Required(CONF_MIN_VOLTAGE): cv.voltage,
-            cv.Required(CONF_MAX_CHARGE_CURRENT): cv.current,
-            cv.Required(CONF_MAX_DISCHARGE_CURRENT): cv.current,
+            # Links to dynamic battery limits (REQUIRED)
+            cv.Required(CONF_MAX_VOLTAGE): cv.use_id(sensor.Sensor),
+            cv.Required(CONF_MIN_VOLTAGE): cv.use_id(sensor.Sensor),
+            cv.Required(CONF_MAX_CHARGE_CURRENT): cv.use_id(sensor.Sensor),
+            cv.Required(CONF_MAX_DISCHARGE_CURRENT): cv.use_id(sensor.Sensor),
 
             # Optional timeout for sensor updates
             cv.Optional(CONF_UPDATE_TIMEOUT, default="60s"): cv.positive_time_period_milliseconds,
@@ -56,24 +56,25 @@ async def to_code(config):
     await cg.register_component(var, config)
     await uart.register_uart_device(var, config)
 
-    # Link the required sensor IDs to the C++ setter methods
+    # Link the required live data sensors
     sens = await cg.get_variable(config[CONF_STATE_OF_CHARGE])
     cg.add(var.set_soc_sensor(sens))
-
     sens = await cg.get_variable(config[CONF_VOLTAGE])
     cg.add(var.set_voltage_sensor(sens))
-
     sens = await cg.get_variable(config[CONF_CURRENT])
     cg.add(var.set_current_sensor(sens))
-
     sens = await cg.get_variable(config[CONF_TEMPERATURE])
     cg.add(var.set_temperature_sensor(sens))
 
-    # Set the required battery limits
-    cg.add(var.set_max_charge_voltage(config[CONF_MAX_VOLTAGE]))
-    cg.add(var.set_min_discharge_voltage(config[CONF_MIN_VOLTAGE]))
-    cg.add(var.set_max_charge_current(config[CONF_MAX_CHARGE_CURRENT]))
-    cg.add(var.set_max_discharge_current(config[CONF_MAX_DISCHARGE_CURRENT]))
+    # Link the required limit sensors
+    sens = await cg.get_variable(config[CONF_MAX_VOLTAGE])
+    cg.add(var.set_max_voltage_sensor(sens))
+    sens = await cg.get_variable(config[CONF_MIN_VOLTAGE])
+    cg.add(var.set_min_voltage_sensor(sens))
+    sens = await cg.get_variable(config[CONF_MAX_CHARGE_CURRENT])
+    cg.add(var.set_max_charge_current_sensor(sens))
+    sens = await cg.get_variable(config[CONF_MAX_DISCHARGE_CURRENT])
+    cg.add(var.set_max_discharge_current_sensor(sens))
 
     # Set the update timeout
     cg.add(var.set_update_timeout(config[CONF_UPDATE_TIMEOUT]))
