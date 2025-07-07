@@ -13,7 +13,8 @@ void PylontechRS485::setup() { ESP_LOGCONFIG(TAG, "Pylontech RS485 component sta
 
 void PylontechRS485::dump_config() {
   ESP_LOGCONFIG(TAG, "Pylontech RS485:");
-  LOG_UART_DEVICE(this);
+  // LOG_UART_DEVICE(this);
+  ESP_LOGCONFIG(TAG, "  UART Bus is configured."); // Add a simple replacement log
   ESP_LOGCONFIG(TAG, "  Update Timeout: %u ms", this->update_timeout_ms_);
   // All sensors and limits are now required, so no need to check for nullptr
   LOG_SENSOR("  ", "SoC Sensor", this->soc_sensor_);
