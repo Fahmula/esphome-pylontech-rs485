@@ -1,0 +1,69 @@
+name: Manual Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Optional: Force a release bump (major, minor, patch). Let semantic-release decide if blank.'
+        required: false
+        type: choice
+        options:
+          - ''
+          - 'patch'
+          - 'minor'
+          - 'major'
+      is_prerelease:
+        description: 'Create a pre-release? (e.g., 2.0.0-rc.1)'
+        required: true
+        type: boolean
+        default: false
+      prerelease_channel:
+        description: 'If pre-release, specify the channel (e.g., "rc", "beta", "alpha"). Default is "rc".'
+        required: false
+        default: 'rc'
+      dry_run:
+        description: 'Log what would happen without creating a real release. Uncheck to perform a live release.'
+        required: true
+        type: boolean
+        default: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write 
+      issues: write 
+      pull-requests: write
+    outputs:
+      new_release_version: ${{ steps.semantic.outputs.new_release_version }}
+      new_release_published: ${{ steps.semantic.outputs.new_release_published }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git User
+        run: |
+          git config user.name "semantic-release-bot"
+          git config user.email "semantic-release-bot@users.noreply.github.com"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+
+      - name: Install Semantic Release plugins
+        run: npm install semantic-release @semantic-release/commit-analyzer @semantic-release/release-notes-generator @semantic-release/changelog @semantic-release/github @semantic-release/git
+
+      - name: Semantic Release
+        id: semantic
+        uses: cycjimmy/semantic-release-action@v4
+        with:
+          dry_run: ${{ github.event.inputs.dry_run }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          IS_PRERELEASE: ${{ github.event.inputs.is_prerelease }}
+          PRERELEASE_CHANNEL: ${{ github.event.inputs.prerelease_channel }}
+          FORCE_RELEASE_TYPE: ${{ github.event.inputs.release_type }}
