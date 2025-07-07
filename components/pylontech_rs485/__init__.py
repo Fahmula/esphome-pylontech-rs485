@@ -1,14 +1,13 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import uart, sensor
+# Import only the truly standard, common constants
 from esphome.const import (
     CONF_ID,
     CONF_VOLTAGE,
     CONF_CURRENT,
     CONF_TEMPERATURE,
     CONF_UART_ID,
-    CONF_MAX_VOLTAGE,
-    CONF_MIN_VOLTAGE,
 )
 
 # Define the namespace for our custom component
@@ -21,12 +20,13 @@ PylontechRS485 = pylontech_rs485_ns.class_(
 
 # Define custom keys for concepts that are not in esphome.const
 CONF_STATE_OF_CHARGE = "state_of_charge"
+CONF_MAX_VOLTAGE = "max_voltage"
+CONF_MIN_VOLTAGE = "min_voltage"
 CONF_MAX_CHARGE_CURRENT = "max_charge_current"
 CONF_MAX_DISCHARGE_CURRENT = "max_discharge_current"
 CONF_UPDATE_TIMEOUT = "update_timeout"
 
 # Define the configuration schema
-# All sensor and limit keys are now REQUIRED. No defaults.
 CONFIG_SCHEMA = (
     cv.Schema(
         {
