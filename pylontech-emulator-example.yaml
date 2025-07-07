@@ -93,6 +93,7 @@ number:
     id: input_soc
     name: "Simulated Battery SoC"
     unit_of_measurement: "%"
+    update_interval: 3s
     min_value: 0
     max_value: 100
     step: 1
@@ -106,6 +107,7 @@ number:
     id: input_voltage # We keep the same ID
     name: "Simulated Battery Voltage"
     unit_of_measurement: "V"
+    update_interval: 3s
     min_value: 46.0
     max_value: 56.0
     step: 0.1
@@ -119,6 +121,7 @@ number:
     id: input_current # We keep the same ID
     name: "Simulated Battery Current"
     unit_of_measurement: "A"
+    update_interval: 3s
     min_value: -25.0
     max_value: 25.0
     step: 0.1
@@ -132,6 +135,7 @@ number:
     id: input_temperature # We keep the same ID
     name: "Simulated Battery Temperature"
     unit_of_measurement: "°C"
+    update_interval: 3s
     min_value: 0
     max_value: 50
     step: 1
@@ -140,10 +144,12 @@ number:
       - globals.set:
           id: g_temperature
           value: !lambda 'return x;'
+
   - platform: template
     id: input_max_v
     name: "Simulated Max Voltage"
     unit_of_measurement: "V"
+    update_interval: 3s
     min_value: 50.0
     max_value: 58.6
     step: 0.1
@@ -157,6 +163,7 @@ number:
     id: input_min_v
     name: "Simulated Min Voltage"
     unit_of_measurement: "V"
+    update_interval: 3s
     min_value: 44.0
     max_value: 48.0
     step: 0.1
@@ -170,6 +177,7 @@ number:
     id: input_max_charge_i
     name: "Simulated Max Charge Current"
     unit_of_measurement: "A"
+    update_interval: 3s
     min_value: 0.0
     max_value: 100.0
     step: 0.5
@@ -183,6 +191,7 @@ number:
     id: input_max_discharge_i
     name: "Simulated Max Discharge Current"
     unit_of_measurement: "A"
+    update_interval: 3s
     min_value: 0.0
     max_value: 100.0
     step: 0.5
@@ -201,40 +210,52 @@ sensor:
     name: "Live SoC for Pylontech"
     lambda: return id(input_soc).state;
     unit_of_measurement: "%"
+    update_interval: 3s
 
   - platform: template
     id: live_voltage
     name: "Live Voltage for Pylontech"
     lambda: return id(input_voltage).state;
     unit_of_measurement: "V"
+    update_interval: 3s
 
   - platform: template
     id: live_current
     name: "Live Current for Pylontech"
     lambda: return id(input_current).state;
     unit_of_measurement: "A"
+    update_interval: 3s
 
   - platform: template
     id: live_temperature
     name: "Live Temperature for Pylontech"
     lambda: return id(input_temperature).state;
     unit_of_measurement: "°C"
+    update_interval: 3s
+
   - platform: template
     id: live_max_v
     lambda: return id(input_max_v).state;
     unit_of_measurement: "V"
+    update_interval: 3s
+
   - platform: template
     id: live_min_v
     lambda: return id(input_min_v).state;
     unit_of_measurement: "V"
+    update_interval: 3s
+
   - platform: template
     id: live_max_charge_i
     lambda: return id(input_max_charge_i).state;
     unit_of_measurement: "A"
+    update_interval: 3s
+
   - platform: template
     id: live_max_discharge_i
     lambda: return id(input_max_discharge_i).state;
     unit_of_measurement: "A"
+    update_interval: 3s
 
 # ===================================================================
 # 4. Configure the Pylontech RS485 Component
