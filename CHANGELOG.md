@@ -1,3 +1,12 @@
+# 1.0.0 (2025-07-07)
+
+
+### Features
+
+* add initial semantic release configuration ([#2](https://github.com/Fahmula/esphome-pylontech-rs485/issues/2)) ([6a4ea2c](https://github.com/Fahmula/esphome-pylontech-rs485/commit/6a4ea2c772460b7ad0fc3d2151c1d9f169cc42d8))
+* add manual release workflow ([#1](https://github.com/Fahmula/esphome-pylontech-rs485/issues/1)) ([2b7c3b4](https://github.com/Fahmula/esphome-pylontech-rs485/commit/2b7c3b411142f57b75f532bd3a3302fa746d341a))
+* Add Pylontech RS485 BMS component ([#3](https://github.com/Fahmula/esphome-pylontech-rs485/issues/3)) ([d21aa78](https://github.com/Fahmula/esphome-pylontech-rs485/commit/d21aa7877410b69da8d5613ce2d01816f8b1e0e7)), closes [#2](https://github.com/Fahmula/esphome-pylontech-rs485/issues/2) [#1](https://github.com/Fahmula/esphome-pylontech-rs485/issues/1)
+
 # [1.0.0-rc.3](https://github.com/Fahmula/esphome-pylontech-rs485/compare/v1.0.0-rc.2...v1.0.0-rc.3) (2025-07-07)
 
 
