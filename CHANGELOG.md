@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/Fahmula/esphome-pylontech-rs485/compare/v1.0.0...v1.1.0) (2025-07-07)
+
+
+### Features
+
+* Add README and example YAML for Pylontech emulator ([#4](https://github.com/Fahmula/esphome-pylontech-rs485/issues/4)) ([b4f81fb](https://github.com/Fahmula/esphome-pylontech-rs485/commit/b4f81fbae6ba3c8ec6a1c802e1f0e260fce4a943))
+
 # 1.0.0 (2025-07-07)
 
 
