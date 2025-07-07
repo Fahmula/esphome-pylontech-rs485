@@ -6,7 +6,6 @@ from esphome.const import (
     CONF_VOLTAGE,
     CONF_CURRENT,
     CONF_TEMPERATURE,
-    CONF_STATE_OF_CHARGE,
     CONF_UART_ID,
     CONF_MAX_VOLTAGE,
     CONF_MIN_VOLTAGE,
@@ -20,7 +19,8 @@ PylontechRS485 = pylontech_rs485_ns.class_(
     "PylontechRS485", cg.Component, uart.UARTDevice
 )
 
-# Define custom keys
+# Define custom keys for concepts that are not in esphome.const
+CONF_STATE_OF_CHARGE = "state_of_charge"
 CONF_MAX_CHARGE_CURRENT = "max_charge_current"
 CONF_MAX_DISCHARGE_CURRENT = "max_discharge_current"
 CONF_UPDATE_TIMEOUT = "update_timeout"
