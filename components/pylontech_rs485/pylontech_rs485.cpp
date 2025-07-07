@@ -13,15 +13,27 @@ void PylontechRS485::setup() { ESP_LOGCONFIG(TAG, "Pylontech RS485 component sta
 
 void PylontechRS485::dump_config() {
   ESP_LOGCONFIG(TAG, "Pylontech RS485:");
-  // LOG_UART_DEVICE(this);
-  ESP_LOGCONFIG(TAG, "  UART Bus is configured."); // Add a simple replacement log
+  ESP_LOGCONFIG(TAG, "  UART Bus is configured.");
   ESP_LOGCONFIG(TAG, "  Update Timeout: %u ms", this->update_timeout_ms_);
+  // Log all configured sensors
   LOG_SENSOR("  ", "SoC Sensor", this->soc_sensor_);
   LOG_SENSOR("  ", "Voltage Sensor", this->voltage_sensor_);
   LOG_SENSOR("  ", "Current Sensor", this->current_sensor_);
   LOG_SENSOR("  ", "Temperature Sensor", this->temperature_sensor_);
-  LOG_SENSOR("  ", "Max Voltage Sensor", this->max_voltage_sensor_);
-  LOG_SENSOR("  ", "Min Voltage Sensor", this->min_voltage_sensor_);
+  LOG_SENSOR("  ", "SoH Sensor", this->soh_sensor_);
+  LOG_SENSOR("  ", "Cycle Count Sensor", this->cycle_count_sensor_);
+  LOG_SENSOR("  ", "Max Temperature Sensor", this->max_temperature_sensor_);
+  LOG_SENSOR("  ", "Min Temperature Sensor", this->min_temperature_sensor_);
+  LOG_SENSOR("  ", "Max Cell Voltage Sensor", this->max_cell_voltage_sensor_);
+  LOG_SENSOR("  ", "Min Cell Voltage Sensor", this->min_cell_voltage_sensor_);
+  LOG_SENSOR("  ", "MOSFET Temperature Sensor", this->mosfet_temperature_sensor_);
+  LOG_SENSOR("  ", "Max MOSFET Temperature Sensor", this->max_mosfet_temperature_sensor_);
+  LOG_SENSOR("  ", "Min MOSFET Temperature Sensor", this->min_mosfet_temperature_sensor_);
+  LOG_SENSOR("  ", "BMS Temperature Sensor", this->bms_temperature_sensor_);
+  LOG_SENSOR("  ", "Max BMS Temperature Sensor", this->max_bms_temperature_sensor_);
+  LOG_SENSOR("  ", "Min BMS Temperature Sensor", this->min_bms_temperature_sensor_);
+  LOG_SENSOR("  ", "Max Voltage (Limit) Sensor", this->max_voltage_sensor_);
+  LOG_SENSOR("  ", "Min Voltage (Limit) Sensor", this->min_voltage_sensor_);
   LOG_SENSOR("  ", "Max Charge Current Sensor", this->max_charge_current_sensor_);
   LOG_SENSOR("  ", "Max Discharge Current Sensor", this->max_discharge_current_sensor_);
 }
@@ -29,22 +41,19 @@ void PylontechRS485::dump_config() {
 float PylontechRS485::get_setup_priority() const { return setup_priority::LATE; }
 
 void PylontechRS485::loop() {
-  // 1. Attempt to update state from sensors
   if (this->update_state_from_sensors_()) {
     this->last_update_ms_ = millis();
     if (!this->is_data_valid_) {
-      ESP_LOGI(TAG, "Valid data received from all sensors. Starting communication with inverter.");
+      ESP_LOGI(TAG, "Valid data received. Starting communication with inverter.");
       this->is_data_valid_ = true;
     }
   }
 
-  // 2. Check for sensor data timeout
   if (this->is_data_valid_ && (millis() - this->last_update_ms_ > this->update_timeout_ms_)) {
-    ESP_LOGW(TAG, "Sensor data timeout! Halting communication with inverter to trigger fail-safe.");
+    ESP_LOGW(TAG, "Sensor data timeout! Halting communication to trigger fail-safe.");
     this->is_data_valid_ = false;
   }
 
-  // 3. Process incoming UART data
   while (this->available()) {
     uint8_t byte;
     if (this->read_byte(&byte)) {
@@ -65,22 +74,30 @@ void PylontechRS485::loop() {
 }
 
 bool PylontechRS485::update_state_from_sensors_() {
-  // Check if all required sensors have a valid state (are not NaN)
-  if (std::isnan(this->soc_sensor_->state) || std::isnan(this->voltage_sensor_->state) ||
-      std::isnan(this->current_sensor_->state) || std::isnan(this->temperature_sensor_->state) ||
-      std::isnan(this->max_voltage_sensor_->state) || std::isnan(this->min_voltage_sensor_->state) ||
-      std::isnan(this->max_charge_current_sensor_->state) || std::isnan(this->max_discharge_current_sensor_->state)) {
-    return false; // At least one sensor is not ready
+  // Check only the most basic sensors to enable communication.
+  // The handle_command_61_ function will check each optional sensor individually.
+  if (this->soc_sensor_ == nullptr || std::isnan(this->soc_sensor_->state) ||
+      this->voltage_sensor_ == nullptr || std::isnan(this->voltage_sensor_->state) ||
+      this->current_sensor_ == nullptr || std::isnan(this->current_sensor_->state) ||
+      this->temperature_sensor_ == nullptr || std::isnan(this->temperature_sensor_->state)) {
+    return false; // Core data is not ready
+  }
+  
+  // Also check sensors for command 63
+  if (this->max_voltage_sensor_ == nullptr || std::isnan(this->max_voltage_sensor_->state) ||
+      this->min_voltage_sensor_ == nullptr || std::isnan(this->min_voltage_sensor_->state) ||
+      this->max_charge_current_sensor_ == nullptr || std::isnan(this->max_charge_current_sensor_->state) ||
+      this->max_discharge_current_sensor_ == nullptr || std::isnan(this->max_discharge_current_sensor_->state)) {
+    return false; // Limit data is not ready
   }
 
-  // All sensors are valid, update member variables
-  // All sensors are valid, update member variables
+  // Update core member variables
   this->soc_percent_ = this->soc_sensor_->state;
   this->voltage_mv_ = this->voltage_sensor_->state * 1000;
   this->current_ca_ = this->current_sensor_->state * 100;
   this->temp_deci_k_ = (this->temperature_sensor_->state + 273.15) * 10;
   
-  // Update limits from their sensors
+  // Update limits from their sensors for command 63
   this->max_charge_v_mv_ = this->max_voltage_sensor_->state * 1000;
   this->min_discharge_v_mv_ = this->min_voltage_sensor_->state * 1000;
   this->max_charge_i_ca_ = this->max_charge_current_sensor_->state * 100;
@@ -90,12 +107,10 @@ bool PylontechRS485::update_state_from_sensors_() {
 }
 
 void PylontechRS485::route_frame_request_(const std::string &frame_str) {
-  // FAIL-SAFE: If data is not valid, do not respond to anything. Go silent.
   if (!this->is_data_valid_) {
     ESP_LOGV(TAG, "Ignoring inverter request, data is not valid.");
     return;
   }
-
   if (frame_str.length() < 18) {
     ESP_LOGW(TAG, "Received frame is too short.");
     return;
@@ -114,14 +129,57 @@ void PylontechRS485::route_frame_request_(const std::string &frame_str) {
 }
 
 void PylontechRS485::handle_command_61_() {
-  // This function is only called if is_data_valid_ is true
+  // --- Create local variables with SAFE DEFAULTS ---
+  uint16_t cycles = 100;
+  uint8_t  soh = 100;
+  uint16_t max_cell_v = 3350;
+  uint16_t min_cell_v = 3350;
+  uint16_t avg_cell_temp = this->temp_deci_k_;
+  uint16_t max_cell_temp = avg_cell_temp;
+  uint16_t min_cell_temp = avg_cell_temp;
+  uint16_t avg_mosfet_temp = avg_cell_temp;
+  uint16_t max_mosfet_temp = avg_cell_temp;
+  uint16_t min_mosfet_temp = avg_cell_temp;
+  uint16_t avg_bms_temp = avg_cell_temp;
+  uint16_t max_bms_temp = avg_cell_temp;
+  uint16_t min_bms_temp = avg_cell_temp;
+
+  // --- Overwrite defaults with real data IF the sensors are provided and valid ---
+  if (this->cycle_count_sensor_ != nullptr && !std::isnan(this->cycle_count_sensor_->state))
+    cycles = this->cycle_count_sensor_->state;
+  if (this->soh_sensor_ != nullptr && !std::isnan(this->soh_sensor_->state))
+    soh = this->soh_sensor_->state;
+  if (this->max_cell_voltage_sensor_ != nullptr && !std::isnan(this->max_cell_voltage_sensor_->state))
+    max_cell_v = this->max_cell_voltage_sensor_->state * 1000;
+  if (this->min_cell_voltage_sensor_ != nullptr && !std::isnan(this->min_cell_voltage_sensor_->state))
+    min_cell_v = this->min_cell_voltage_sensor_->state * 1000;
+  if (this->max_temperature_sensor_ != nullptr && !std::isnan(this->max_temperature_sensor_->state))
+    max_cell_temp = (this->max_temperature_sensor_->state + 273.15) * 10;
+  if (this->min_temperature_sensor_ != nullptr && !std::isnan(this->min_temperature_sensor_->state))
+    min_cell_temp = (this->min_temperature_sensor_->state + 273.15) * 10;
+  if (this->mosfet_temperature_sensor_ != nullptr && !std::isnan(this->mosfet_temperature_sensor_->state))
+    avg_mosfet_temp = (this->mosfet_temperature_sensor_->state + 273.15) * 10;
+  if (this->max_mosfet_temperature_sensor_ != nullptr && !std::isnan(this->max_mosfet_temperature_sensor_->state))
+    max_mosfet_temp = (this->max_mosfet_temperature_sensor_->state + 273.15) * 10;
+  if (this->min_mosfet_temperature_sensor_ != nullptr && !std::isnan(this->min_mosfet_temperature_sensor_->state))
+    min_mosfet_temp = (this->min_mosfet_temperature_sensor_->state + 273.15) * 10;
+  if (this->bms_temperature_sensor_ != nullptr && !std::isnan(this->bms_temperature_sensor_->state))
+    avg_bms_temp = (this->bms_temperature_sensor_->state + 273.15) * 10;
+  if (this->max_bms_temperature_sensor_ != nullptr && !std::isnan(this->max_bms_temperature_sensor_->state))
+    max_bms_temp = (this->max_bms_temperature_sensor_->state + 273.15) * 10;
+  if (this->min_bms_temperature_sensor_ != nullptr && !std::isnan(this->min_bms_temperature_sensor_->state))
+    min_bms_temp = (this->min_bms_temperature_sensor_->state + 273.15) * 10;
+
+  // Build the full, structurally-correct payload
   char info_payload[99];
   snprintf(info_payload, sizeof(info_payload),
            "%04X%04X%02X%04X%04X%02X%02X%04X%04X%04X%04X%04X%04X%04X%04X%04X%04X%04X%04X%04X%04X%04X%04X%04X%04X%04X",
-           this->voltage_mv_, (uint16_t) this->current_ca_, this->soc_percent_, 100, 100, 99, 99, 3280, 0x0101, 3280,
-           0x0108, this->temp_deci_k_, this->temp_deci_k_, 0x0103, this->temp_deci_k_, 0x0109, this->temp_deci_k_,
-           this->temp_deci_k_, 0x0101, this->temp_deci_k_, 0x0101, this->temp_deci_k_, this->temp_deci_k_, 0x0101,
-           this->temp_deci_k_, 0x0101);
+           this->voltage_mv_, (uint16_t) this->current_ca_, this->soc_percent_, cycles, cycles, soh, soh,
+           max_cell_v, 0x0101, min_cell_v, 0x0108,
+           avg_cell_temp, max_cell_temp, 0x0103, min_cell_temp, 0x0109,
+           avg_mosfet_temp, max_mosfet_temp, 0x0101, min_mosfet_temp, 0x0101,
+           avg_bms_temp, max_bms_temp, 0x0101, min_bms_temp, 0x0101);
+  
   std::string info_payload_str(info_payload);
   std::string length_field = this->calculate_length_field_(info_payload_str.length());
   std::string frame_data = PROTOCOL_VERSION + RESPONSE_ADDRESS + "4600" + length_field + info_payload_str;
@@ -130,8 +188,9 @@ void PylontechRS485::handle_command_61_() {
   this->write_str(full_frame.c_str());
 }
 
+// --- handle_command_62_() and handle_command_63_() remain the same for now ---
 void PylontechRS485::handle_command_62_() {
-  std::string info_payload = "00000000";
+  std::string info_payload = "00000000"; // Placeholder for alarms
   std::string length_field = this->calculate_length_field_(info_payload.length());
   std::string frame_data = PROTOCOL_VERSION + RESPONSE_ADDRESS + "4600" + length_field + info_payload;
   std::string checksum = this->calculate_checksum_(frame_data);
@@ -140,7 +199,6 @@ void PylontechRS485::handle_command_62_() {
 }
 
 void PylontechRS485::handle_command_63_() {
-  // This function is only called if is_data_valid_ is true
   char info_payload[19];
   uint8_t status_byte = 0xC0;
   snprintf(info_payload, sizeof(info_payload), "%04X%04X%04X%04X%02X", this->max_charge_v_mv_,
@@ -153,6 +211,7 @@ void PylontechRS485::handle_command_63_() {
   this->write_str(full_frame.c_str());
 }
 
+// --- Checksum functions remain the same ---
 std::string PylontechRS485::calculate_checksum_(const std::string &frame_data) {
   uint16_t sum = 0;
   for (char c : frame_data) {
