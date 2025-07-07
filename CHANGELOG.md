@@ -1,3 +1,17 @@
+# [1.0.0-rc.3](https://github.com/Fahmula/esphome-pylontech-rs485/compare/v1.0.0-rc.2...v1.0.0-rc.3) (2025-07-07)
+
+
+### Bug Fixes
+
+* **cpp:** Use std::isnan for sensor state checks ([361ff44](https://github.com/Fahmula/esphome-pylontech-rs485/commit/361ff446b8acddf28ffc6380e75b9319eb388b5d))
+* **init.py:** Move voltage constants to component ([7d01b54](https://github.com/Fahmula/esphome-pylontech-rs485/commit/7d01b54b73f4ad61107c9c65a1112918c65639a2))
+* **pylontech_rs485:** Comment out LOG_UART_DEVICE and add replacement log for UART Bus configuration ([0fb8d17](https://github.com/Fahmula/esphome-pylontech-rs485/commit/0fb8d175b7cce2b44047ca4ef24246c3575eb6e6))
+
+
+### Features
+
+* Make battery limits dynamic via sensors ([4b27a49](https://github.com/Fahmula/esphome-pylontech-rs485/commit/4b27a49e9ba6eabeca4143d713a80ded6b0c3c33))
+
 # [1.0.0-rc.2](https://github.com/Fahmula/esphome-pylontech-rs485/compare/v1.0.0-rc.1...v1.0.0-rc.2) (2025-07-07)
 
 
