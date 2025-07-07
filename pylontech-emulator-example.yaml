@@ -1,0 +1,261 @@
+# ===================================================================
+# ESPHome Configuration for a Pylontech RS485 BMS Emulator
+# ===================================================================
+
+esphome:
+  name: pylontech-emulator
+  friendly_name: "Pylontech Emulator"
+  
+external_components:
+  - source: github://fahmula/esphome-pylontech-rs485@main
+    refresh: 0s
+
+esp32:
+  board: m5stack-atoms3
+  variant: esp32s3
+  framework:
+    type: esp-idf
+
+logger:
+  level: DEBUG
+  hardware_uart: USB_SERIAL_JTAG
+  baud_rate: 0
+
+# Enable the Home Assistant API to see and control the helpers
+api:
+  reboot_timeout: 0s
+
+# Enable a web server for OTA updates
+ota:
+  platform: esphome
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: "Pylontech Emulator"
+    password: "password123"
+
+captive_portal:
+
+# ===================================================================
+# 1. Define the UART bus for communication with the inverter
+# ===================================================================
+uart:
+  - id: uart_bus
+    tx_pin: GPIO2 # Use the correct TX pin for your board
+    rx_pin: GPIO1 # Use the correct RX pin for your board
+    baud_rate: 9600 # IMPORTANT: Match this to your inverter's setting
+
+# ===================================================================
+# 2. Create Template Numbers to simulate battery data
+#    These will appear as sliders in Home Assistant.
+# ===================================================================
+
+# --- Define global variables to hold the state of our sliders ---
+globals:
+  - id: g_soc
+    type: float
+    restore_value: yes
+    initial_value: '75.0'
+  - id: g_voltage
+    type: float
+    restore_value: yes
+    initial_value: '52.5'
+  - id: g_current
+    type: float
+    restore_value: yes
+    initial_value: '5'
+  - id: g_temperature
+    type: float
+    restore_value: yes
+    initial_value: '25.0'
+  - id: g_max_v
+    type: float
+    restore_value: yes
+    initial_value: '55.2'
+  - id: g_min_v
+    type: float
+    restore_value: yes
+    initial_value: '48.0'
+  - id: g_max_charge_i
+    type: float
+    restore_value: yes
+    initial_value: '50.0'
+  - id: g_max_discharge_i
+    type: float
+    restore_value: yes
+    initial_value: '100.0'
+
+# --- Number entities (sliders) that Home Assistant will see ---
+number:
+  - platform: template
+    id: input_soc
+    name: "Simulated Battery SoC"
+    unit_of_measurement: "%"
+    min_value: 0
+    max_value: 100
+    step: 1
+    lambda: return id(g_soc);
+    set_action:
+      - globals.set:
+          id: g_soc
+          value: !lambda 'return x;'
+
+  - platform: template
+    id: input_voltage # We keep the same ID
+    name: "Simulated Battery Voltage"
+    unit_of_measurement: "V"
+    min_value: 46.0
+    max_value: 56.0
+    step: 0.1
+    lambda: return id(g_voltage);
+    set_action:
+      - globals.set:
+          id: g_voltage
+          value: !lambda 'return x;'
+
+  - platform: template
+    id: input_current # We keep the same ID
+    name: "Simulated Battery Current"
+    unit_of_measurement: "A"
+    min_value: -25.0
+    max_value: 25.0
+    step: 0.1
+    lambda: return id(g_current);
+    set_action:
+      - globals.set:
+          id: g_current
+          value: !lambda 'return x;'
+
+  - platform: template
+    id: input_temperature # We keep the same ID
+    name: "Simulated Battery Temperature"
+    unit_of_measurement: "°C"
+    min_value: 0
+    max_value: 50
+    step: 1
+    lambda: return id(g_temperature);
+    set_action:
+      - globals.set:
+          id: g_temperature
+          value: !lambda 'return x;'
+  - platform: template
+    id: input_max_v
+    name: "Simulated Max Voltage"
+    unit_of_measurement: "V"
+    min_value: 50.0
+    max_value: 58.6
+    step: 0.1
+    lambda: return id(g_max_v);
+    set_action:
+      - globals.set:
+          id: g_max_v
+          value: !lambda 'return x;'
+
+  - platform: template
+    id: input_min_v
+    name: "Simulated Min Voltage"
+    unit_of_measurement: "V"
+    min_value: 44.0
+    max_value: 48.0
+    step: 0.1
+    lambda: return id(g_min_v);
+    set_action:
+      - globals.set:
+          id: g_min_v
+          value: !lambda 'return x;'
+
+  - platform: template
+    id: input_max_charge_i
+    name: "Simulated Max Charge Current"
+    unit_of_measurement: "A"
+    min_value: 0.0
+    max_value: 100.0
+    step: 0.5
+    lambda: return id(g_max_charge_i);
+    set_action:
+      - globals.set:
+          id: g_max_charge_i
+          value: !lambda 'return x;'
+
+  - platform: template
+    id: input_max_discharge_i
+    name: "Simulated Max Discharge Current"
+    unit_of_measurement: "A"
+    min_value: 0.0
+    max_value: 100.0
+    step: 0.5
+    lambda: return id(g_max_discharge_i);
+    set_action:
+      - globals.set:
+          id: g_max_discharge_i
+          value: !lambda 'return x;'
+
+# ===================================================================
+# 3. Template Sensors to provide the live data
+# ===================================================================
+sensor:
+  - platform: template
+    id: live_soc
+    name: "Live SoC for Pylontech"
+    lambda: return id(input_soc).state;
+    unit_of_measurement: "%"
+
+  - platform: template
+    id: live_voltage
+    name: "Live Voltage for Pylontech"
+    lambda: return id(input_voltage).state;
+    unit_of_measurement: "V"
+
+  - platform: template
+    id: live_current
+    name: "Live Current for Pylontech"
+    lambda: return id(input_current).state;
+    unit_of_measurement: "A"
+
+  - platform: template
+    id: live_temperature
+    name: "Live Temperature for Pylontech"
+    lambda: return id(input_temperature).state;
+    unit_of_measurement: "°C"
+  - platform: template
+    id: live_max_v
+    lambda: return id(input_max_v).state;
+    unit_of_measurement: "V"
+  - platform: template
+    id: live_min_v
+    lambda: return id(input_min_v).state;
+    unit_of_measurement: "V"
+  - platform: template
+    id: live_max_charge_i
+    lambda: return id(input_max_charge_i).state;
+    unit_of_measurement: "A"
+  - platform: template
+    id: live_max_discharge_i
+    lambda: return id(input_max_discharge_i).state;
+    unit_of_measurement: "A"
+
+# ===================================================================
+# 4. Configure the Pylontech RS485 Component
+# ===================================================================
+pylontech_rs485:
+  # Link to the UART bus we defined above
+  uart_id: uart_bus
+
+  # --- Link to the required live data sensors ---
+  state_of_charge: live_soc
+  voltage: live_voltage
+  current: live_current
+  temperature: live_temperature
+
+   # --- Link to the required DYNAMIC battery limits ---
+  max_voltage: live_max_v
+  min_voltage: live_min_v
+  max_charge_current: live_max_charge_i
+  max_discharge_current: live_max_discharge_i
+
+  # --- (Optional) Configure the sensor update timeout ---
+  # If no new data is received from the sensors for this long,
+  # the component will stop talking to the inverter.
+  update_timeout: 60s
