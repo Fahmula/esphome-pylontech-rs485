@@ -1,12 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import sensor, uart
+from esphome.components import sensor
 from esphome.const import CONF_ID
-
-
-# --- The C++ namespace and get a handle to the class ---
-pylontech_rs485_ns = cg.esphome_ns.namespace("esphome::pylontech_rs485")
-PylontechRS485 = pylontech_rs485_ns.class_("PylontechRS485", cg.Component, uart.UARTDevice)
 
 # --- Primary dynamic values ---
 CONF_STATE_OF_CHARGE = "state_of_charge"
@@ -46,11 +41,8 @@ CONF_MIN_BMS_TEMPERATURE = "min_bms_temperature"
 CONF_UPDATE_TIMEOUT = "update_timeout"
 
 # --- Main Configuration Schema ---
-CONFIG_SCHEMA = (
-    cv.Schema(
+SENSOR_KEYS_SCHEMA = cv.Schema(
         {
-            cv.GenerateID(): cv.declare_id(PylontechRS485),
-            
             # --- Make all sensors OPTIONAL to allow for progressive setup ---
             cv.Optional(CONF_STATE_OF_CHARGE): cv.use_id(sensor.Sensor),
             cv.Optional(CONF_VOLTAGE): cv.use_id(sensor.Sensor),
@@ -76,16 +68,10 @@ CONFIG_SCHEMA = (
 
             cv.Optional(CONF_UPDATE_TIMEOUT, default="60s"): cv.positive_time_period_milliseconds,
         }
-    )
-    .extend(cv.COMPONENT_SCHEMA)
-    .extend(uart.UART_DEVICE_SCHEMA)
 )
 
 # --- Function to generate C++ code from the config ---
-async def to_code(config):
-    var = cg.new_Pvariable(config[CONF_ID], PylontechRS485)
-    await cg.register_component(var, config)
-    await uart.register_uart_device(var, config)
+async def to_code(var, config):
 
     # --- Helper dictionary to avoid repetition ---
     # This maps the YAML key to the C++ setter function name.
