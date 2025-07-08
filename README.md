@@ -42,7 +42,7 @@ To include this component in your ESPHome project, add the following to your YAM
 
 ```yaml
 external_components:
-  - source: github://fahmula/esphome-pylontech-rs485@main
+  - source: github://fahmula/esphome-pylontech-rs485@next
     refresh: 0s # Optional: Set to a duration (e.g., 1h) to periodically check for updates
 ```
 
@@ -54,36 +54,69 @@ The `pylontech_rs485` component is configured under its own block in your ESPHom
 pylontech_rs485:
   uart_id: uart_bus # REQUIRED: Link to the UART bus defined elsewhere in your YAML
   
-  # REQUIRED: Link to ESPHome sensor entities providing live battery data
+  # --- Core Data (Required for basic operation) ---
   state_of_charge: live_soc
   voltage: live_voltage
   current: live_current
   temperature: live_temperature
 
-  # REQUIRED: Link to ESPHome sensor entities providing dynamic battery limits
+  # --- Dynamic Battery Limits (Required for basic operation) ---
   max_voltage: live_max_v
   min_voltage: live_min_v
   max_charge_current: live_max_charge_i
   max_discharge_current: live_max_discharge_i
 
+  # --- Optional Health & Detail Sensors (for full protocol compliance) ---
+  # state_of_health: live_soh
+  # cycle_count: live_cycle_count
+  # max_cell_voltage: live_max_cell_v
+  # min_cell_voltage: live_min_cell_v
+  # max_temperature: live_max_temp
+  # min_temperature: live_min_temp
+  # mosfet_temperature: live_mosfet_temp
+  # max_mosfet_temperature: live_max_mosfet_temp
+  # min_mosfet_temperature: live_min_mosfet_temp
+  # bms_temperature: live_bms_temp
+  # max_bms_temperature: live_max_bms_temp
+  # min_bms_temperature: live_min_bms_temp
+
   # OPTIONAL: Configure the sensor update timeout
   # If no new data is received from the linked sensors for this duration,
   # the component will stop talking to the inverter.
   # Default: 60s
-  update_timeout: 60s 
+  update_timeout: 60s
 ```
 
 ### Parameter Descriptions:
 
 *   `uart_id` (Required): The ID of the `uart` bus component used for RS485 communication with the inverter.
-*   `state_of_charge` (Required): The ID of an ESPHome `sensor` entity that provides the current State of Charge (SoC) as a percentage (0-100).
-*   `voltage` (Required): The ID of an ESPHome `sensor` entity that provides the current battery voltage in Volts.
-*   `current` (Required): The ID of an ESPHome `sensor` entity that provides the current battery current in Amperes. Positive for charging, negative for discharging.
-*   `temperature` (Required): The ID of an ESPHome `sensor` entity that provides the current battery temperature in Celsius.
-*   `max_voltage` (Required): The ID of an ESPHome `sensor` entity that provides the maximum allowed battery charge voltage in Volts.
-*   `min_voltage` (Required): The ID of an ESPHome `sensor` entity that provides the minimum allowed battery discharge voltage in Volts.
-*   `max_charge_current` (Required): The ID of an ESPHome `sensor` entity that provides the maximum allowed charging current in Amperes.
-*   `max_discharge_current` (Required): The ID of an ESPHome `sensor` entity that provides the maximum allowed discharging current in Amperes.
+
+*   **Core Data Sensors (Required for basic operation):**
+    *   `state_of_charge` (Required): The ID of an ESPHome `sensor` entity that provides the current State of Charge (SoC) as a percentage (0-100).
+    *   `voltage` (Required): The ID of an ESPHome `sensor` entity that provides the current battery voltage in Volts.
+    *   `current` (Required): The ID of an ESPHome `sensor` entity that provides the current battery current in Amperes. Positive for charging, negative for discharging.
+    *   `temperature` (Required): The ID of an ESPHome `sensor` entity that provides the current battery temperature in Celsius.
+
+*   **Dynamic Battery Limits Sensors (Required for basic operation):**
+    *   `max_voltage` (Required): The ID of an ESPHome `sensor` entity that provides the maximum allowed battery charge voltage in Volts.
+    *   `min_voltage` (Required): The ID of an ESPHome `sensor` entity that provides the minimum allowed battery discharge voltage in Volts.
+    *   `max_charge_current` (Required): The ID of an ESPHome `sensor` entity that provides the maximum allowed charging current in Amperes.
+    *   `max_discharge_current` (Required): The ID of an ESPHome `sensor` entity that provides the maximum allowed discharging current in Amperes.
+
+*   **Optional Health & Detail Sensors (for full protocol compliance):**
+    *   `state_of_health` (Optional): The ID of an ESPHome `sensor` entity that provides the State of Health (SoH) as a percentage (0-100).
+    *   `cycle_count` (Optional): The ID of an ESPHome `sensor` entity that provides the total battery cycle count.
+    *   `max_cell_voltage` (Optional): The ID of an ESPHome `sensor` entity that provides the maximum cell voltage in Volts.
+    *   `min_cell_voltage` (Optional): The ID of an ESPHome `sensor` entity that provides the minimum cell voltage in Volts.
+    *   `max_temperature` (Optional): The ID of an ESPHome `sensor` entity that provides the maximum cell temperature in Celsius.
+    *   `min_temperature` (Optional): The ID of an ESPHome `sensor` entity that provides the minimum cell temperature in Celsius.
+    *   `mosfet_temperature` (Optional): The ID of an ESPHome `sensor` entity that provides the average MOSFET temperature in Celsius.
+    *   `max_mosfet_temperature` (Optional): The ID of an ESPHome `sensor` entity that provides the maximum MOSFET temperature in Celsius.
+    *   `min_mosfet_temperature` (Optional): The ID of an ESPHome `sensor` entity that provides the minimum MOSFET temperature in Celsius.
+    *   `bms_temperature` (Optional): The ID of an ESPHome `sensor` entity that provides the average BMS temperature in Celsius.
+    *   `max_bms_temperature` (Optional): The ID of an ESPHome `sensor` entity that provides the maximum BMS temperature in Celsius.
+    *   `min_bms_temperature` (Optional): The ID of an ESPHome `sensor` entity that provides the minimum BMS temperature in Celsius.
+
 *   `update_timeout` (Optional, default: `60s`): The duration after which, if no new data is received from the linked sensors, the component will stop sending data to the inverter.
 
 ## Providing Battery Data (The Core Concept)
