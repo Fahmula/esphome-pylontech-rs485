@@ -7,7 +7,7 @@ esphome:
   friendly_name: "Pylontech Emulator"
   
 external_components:
-  - source: github://fahmula/esphome-pylontech-rs485@main
+  - source: github://fahmula/esphome-pylontech-rs485@next
     refresh: 0s
 
 esp32:
@@ -258,25 +258,107 @@ sensor:
     update_interval: 3s
 
 # ===================================================================
+# 3a. Dummy Sensors for Full Protocol Compliance
+#     These provide the optional data for the full `61` command.
+# ===================================================================
+  - platform: template
+    id: live_soh
+    lambda: return 100.0;
+    unit_of_measurement: "%"
+
+  - platform: template
+    id: live_cycle_count
+    lambda: return 100.0;
+    unit_of_measurement: "cycles"
+
+  - platform: template
+    id: live_max_cell_v
+    lambda: return 3.35;
+    unit_of_measurement: "V"
+
+  - platform: template
+    id: live_min_cell_v
+    lambda: return 3.35;
+    unit_of_measurement: "V"
+
+  - platform: template
+    id: live_max_temp
+    lambda: return id(input_temperature).state;
+    unit_of_measurement: "°C"
+
+  - platform: template
+    id: live_min_temp
+    lambda: return id(input_temperature).state;
+    unit_of_measurement: "°C"
+
+  - platform: template
+    id: live_mosfet_temp
+    lambda: return id(input_temperature).state;
+    unit_of_measurement: "°C"
+
+  - platform: template
+    id: live_max_mosfet_temp
+    lambda: return id(input_temperature).state;
+    unit_of_measurement: "°C"
+
+  - platform: template
+    id: live_min_mosfet_temp
+    lambda: return id(input_temperature).state;
+    unit_of_measurement: "°C"
+
+  - platform: template
+    id: live_bms_temp
+    lambda: return id(input_temperature).state;
+    unit_of_measurement: "°C"
+
+  - platform: template
+    id: live_max_bms_temp
+    lambda: return id(input_temperature).state;
+    unit_of_measurement: "°C"
+  
+  - platform: template
+    id: live_min_bms_temp
+    lambda: return id(input_temperature).state;
+    unit_of_measurement: "°C"
+
+# ===================================================================
 # 4. Configure the Pylontech RS485 Component
 # ===================================================================
 pylontech_rs485:
-  # Link to the UART bus we defined above
   uart_id: uart_bus
+  update_timeout: 60s
 
-  # --- Link to the required live data sensors ---
+  # --- Link ALL sensors to the component ---
+  # Core data
   state_of_charge: live_soc
   voltage: live_voltage
   current: live_current
   temperature: live_temperature
+  
+  # Health data
+  state_of_health: live_soh
+  cycle_count: live_cycle_count
 
-   # --- Link to the required DYNAMIC battery limits ---
+  # Cell voltage data
+  max_cell_voltage: live_max_cell_v
+  min_cell_voltage: live_min_cell_v
+
+  # Cell temperature data
+  max_temperature: live_max_temp
+  min_temperature: live_min_temp
+
+  # MOSFET temperature data
+  mosfet_temperature: live_mosfet_temp
+  max_mosfet_temperature: live_max_mosfet_temp
+  min_mosfet_temperature: live_min_mosfet_temp
+
+  # BMS temperature data
+  bms_temperature: live_bms_temp
+  max_bms_temperature: live_max_bms_temp
+  min_bms_temperature: live_min_bms_temp
+
+  # Dynamic battery limits (for command 63)
   max_voltage: live_max_v
   min_voltage: live_min_v
   max_charge_current: live_max_charge_i
   max_discharge_current: live_max_discharge_i
-
-  # --- (Optional) Configure the sensor update timeout ---
-  # If no new data is received from the sensors for this long,
-  # the component will stop talking to the inverter.
-  update_timeout: 60s
