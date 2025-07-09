@@ -1,3 +1,10 @@
+# [1.2.0-rc.2](https://github.com/Fahmula/esphome-pylontech-rs485/compare/v1.2.0-rc.1...v1.2.0-rc.2) (2025-07-09)
+
+
+### Features
+
+* Add alarm and protection binary sensors ([00c5990](https://github.com/Fahmula/esphome-pylontech-rs485/commit/00c5990a5703b9805768c77ea39fe7bf4182715c))
+
 # [1.2.0-rc.1](https://github.com/Fahmula/esphome-pylontech-rs485/compare/v1.1.0...v1.2.0-rc.1) (2025-07-08)
 
 
