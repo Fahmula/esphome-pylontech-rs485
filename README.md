@@ -85,6 +85,39 @@ pylontech_rs485:
   # the component will stop talking to the inverter.
   # Default: 60s
   update_timeout: 60s
+
+  # --- Optional Alarm and Protection Binary Sensors ---
+  # Uncomment and link to ESPHome binary_sensor entities to report alarm and protection statuses.
+  # These are typically used for simulation/testing purposes with the pylontech-emulator-example.yaml.
+  #
+  # Alarm Status 1
+  # total_voltage_high_alarm: alarm_total_voltage_high
+  # total_voltage_low_alarm: alarm_total_voltage_low
+  # cell_voltage_high_alarm: alarm_cell_voltage_high
+  # cell_voltage_low_alarm: alarm_cell_voltage_low
+  # cell_temp_high_alarm: alarm_cell_temp_high
+  # cell_temp_low_alarm: alarm_cell_temp_low
+  # mosfet_temp_high_alarm: alarm_mosfet_temp_high
+  # cell_imbalance_alarm: alarm_cell_imbalance
+  #
+  # Alarm Status 2
+  # cell_temp_imbalance_alarm: alarm_cell_temp_imbalance
+  # charge_overcurrent_alarm: alarm_charge_over_current
+  # discharge_overcurrent_alarm: alarm_discharge_over_current
+  #
+  # Protection Status 1
+  # module_overvoltage_protection: protection_module_overvoltage
+  # module_undervoltage_protection: protection_module_undervoltage
+  # cell_overvoltage_protection: protection_cell_overvoltage
+  # cell_undervoltage_protection: protection_cell_undervoltage
+  # cell_overtemp_protection: protection_cell_over_temperature
+  # cell_undertemp_protection: protection_cell_under_temperature
+  # mosfet_overtemp_protection: protection_mosfet_over_temperature
+  #
+  # Protection Status 2
+  # charge_overcurrent_protection: protection_charge_over_current
+  # discharge_overcurrent_protection: protection_discharge_over_current
+  # system_fault_protection: protection_system_fault
 ```
 
 ### Parameter Descriptions:
@@ -118,6 +151,29 @@ pylontech_rs485:
     *   `min_bms_temperature` (Optional): The ID of an ESPHome `sensor` entity that provides the minimum BMS temperature in Celsius.
 
 *   `update_timeout` (Optional, default: `60s`): The duration after which, if no new data is received from the linked sensors, the component will stop sending data to the inverter.
+
+*   **Optional Alarm and Protection Binary Sensors:**
+    *   `total_voltage_high_alarm` (Optional): The ID of an ESPHome `binary_sensor` entity that indicates if the total battery voltage is too high.
+    *   `total_voltage_low_alarm` (Optional): The ID of an ESPHome `binary_sensor` entity that indicates if the total battery voltage is too low.
+    *   `cell_voltage_high_alarm` (Optional): The ID of an ESPHome `binary_sensor` entity that indicates if any cell voltage is too high.
+    *   `cell_voltage_low_alarm` (Optional): The ID of an ESPHome `binary_sensor` entity that indicates if any cell voltage is too low.
+    *   `cell_temp_high_alarm` (Optional): The ID of an ESPHome `binary_sensor` entity that indicates if any cell temperature is too high.
+    *   `cell_temp_low_alarm` (Optional): The ID of an ESPHome `binary_sensor` entity that indicates if any cell temperature is too low.
+    *   `mosfet_temp_high_alarm` (Optional): The ID of an ESPHome `binary_sensor` entity that indicates if the MOSFET temperature is too high.
+    *   `cell_temp_imbalance_alarm` (Optional): The ID of an ESPHome `binary_sensor` entity that indicates if there is a cell temperature imbalance.
+    *   `cell_imbalance_alarm` (Optional): The ID of an ESPHome `binary_sensor` entity that indicates if there is a cell voltage imbalance.
+    *   `charge_overcurrent_alarm` (Optional): The ID of an ESPHome `binary_sensor` entity that indicates if there is a charge overcurrent alarm.
+    *   `discharge_overcurrent_alarm` (Optional): The ID of an ESPHome `binary_sensor` entity that indicates if there is a discharge overcurrent alarm.
+    *   `module_overvoltage_protection` (Optional): The ID of an ESPHome `binary_sensor` entity that indicates if module overvoltage protection is active.
+    *   `module_undervoltage_protection` (Optional): The ID of an ESPHome `binary_sensor` entity that indicates if module undervoltage protection is active.
+    *   `cell_overvoltage_protection` (Optional): The ID of an ESPHome `binary_sensor` entity that indicates if cell overvoltage protection is active.
+    *   `cell_undervoltage_protection` (Optional): The ID of an ESPHome `binary_sensor` entity that indicates if cell undervoltage protection is active.
+    *   `cell_overtemp_protection` (Optional): The ID of an ESPHome `binary_sensor` entity that indicates if cell overtemperature protection is active.
+    *   `cell_undertemp_protection` (Optional): The ID of an ESPHome `binary_sensor` entity that indicates if cell undertemperature protection is active.
+    *   `mosfet_overtemp_protection` (Optional): The ID of an ESPHome `binary_sensor` entity that indicates if MOSFET overtemperature protection is active.
+    *   `charge_overcurrent_protection` (Optional): The ID of an ESPHome `binary_sensor` entity that indicates if charge overcurrent protection is active.
+    *   `discharge_overcurrent_protection` (Optional): The ID of an ESPHome `binary_sensor` entity that indicates if discharge overcurrent protection is active.
+    *   `system_fault_protection` (Optional): The ID of an ESPHome `binary_sensor` entity that indicates if system fault protection is active.
 
 ## Providing Battery Data (The Core Concept)
 
@@ -166,8 +222,7 @@ graph TD
 
 ## Future Development
 
-*   Add dynamic alarm generation to the `62H` handler based on live sensor data.
-*   Add support for other inverter "dialects" (e.g., Growatt).
+*   Add support for other inverters if needed.
 
 ## Contributing
 

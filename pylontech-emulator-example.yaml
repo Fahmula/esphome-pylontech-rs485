@@ -54,6 +54,7 @@ uart:
 
 # --- Define global variables to hold the state of our sliders ---
 globals:
+  # --- sensors ---
   - id: g_soc
     type: float
     restore_value: yes
@@ -86,6 +87,94 @@ globals:
     type: float
     restore_value: yes
     initial_value: '100.0'
+
+  # --- Alarms ---
+  - id: g_alarm_total_voltage_high
+    type: bool
+    restore_value: yes
+    initial_value: 'false'
+  - id: g_alarm_total_voltage_low
+    type: bool
+    restore_value: yes
+    initial_value: 'false'
+  - id: g_alarm_cell_voltage_high
+    type: bool
+    restore_value: yes
+    initial_value: 'false'
+  - id: g_alarm_cell_voltage_low
+    type: bool
+    restore_value: yes
+    initial_value: 'false'
+  - id: g_alarm_cell_temp_high
+    type: bool
+    restore_value: yes
+    initial_value: 'false'
+  - id: g_alarm_cell_temp_low
+    type: bool
+    restore_value: yes
+    initial_value: 'false'
+  - id: g_alarm_mosfet_temp_high
+    type: bool
+    restore_value: yes
+    initial_value: 'false'
+  - id: g_alarm_cell_temp_imbalance
+    type: bool
+    restore_value: yes
+    initial_value: 'false'
+  - id: g_alarm_cell_imbalance
+    type: bool
+    restore_value: yes
+    initial_value: 'false'
+  - id: g_alarm_charge_over_current
+    type: bool
+    restore_value: yes
+    initial_value: 'false'
+  - id: g_alarm_discharge_over_current
+    type: bool
+    restore_value: yes
+    initial_value: 'false'
+
+  # --- Protections ---
+  - id: g_protection_module_overvoltage
+    type: bool
+    restore_value: yes
+    initial_value: 'false'
+  - id: g_protection_module_undervoltage
+    type: bool
+    restore_value: yes
+    initial_value: 'false'
+  - id: g_protection_cell_overvoltage
+    type: bool
+    restore_value: yes
+    initial_value: 'false'
+  - id: g_protection_cell_undervoltage
+    type: bool
+    restore_value: yes
+    initial_value: 'false'
+  - id: g_protection_cell_over_temperature
+    type: bool
+    restore_value: yes
+    initial_value: 'false'
+  - id: g_protection_cell_under_temperature
+    type: bool
+    restore_value: yes
+    initial_value: 'false'
+  - id: g_protection_mosfet_over_temperature
+    type: bool
+    restore_value: yes
+    initial_value: 'false'
+  - id: g_protection_charge_over_current
+    type: bool
+    restore_value: yes
+    initial_value: 'false'
+  - id: g_protection_discharge_over_current
+    type: bool
+    restore_value: yes
+    initial_value: 'false'
+  - id: g_protection_system_fault
+    type: bool
+    restore_value: yes
+    initial_value: 'false'
 
 # --- Number entities (sliders) that Home Assistant will see ---
 number:
@@ -200,6 +289,198 @@ number:
       - globals.set:
           id: g_max_discharge_i
           value: !lambda 'return x;'
+
+switch:
+  # --- Alarm Switches ---
+  - platform: template
+    name: "Simulated Alarm: Total Voltage High"
+    id: switch_alarm_total_voltage_high
+    lambda: return id(g_alarm_total_voltage_high);
+    turn_on_action:
+      - globals.set: { id: g_alarm_total_voltage_high, value: 'true' }
+    turn_off_action:
+      - globals.set: { id: g_alarm_total_voltage_high, value: 'false' }
+
+  - platform: template
+    name: "Simulated Alarm: Total Voltage Low"
+    id: switch_alarm_total_voltage_low
+    lambda: return id(g_alarm_total_voltage_low);
+    turn_on_action:
+      - globals.set: { id: g_alarm_total_voltage_low, value: 'true' }
+    turn_off_action:
+      - globals.set: { id: g_alarm_total_voltage_low, value: 'false' }
+
+  - platform: template
+    name: "Simulated Alarm: Cell Voltage High"
+    id: switch_alarm_cell_voltage_high
+    lambda: return id(g_alarm_cell_voltage_high);
+    turn_on_action:
+      - globals.set: { id: g_alarm_cell_voltage_high, value: 'true' }
+    turn_off_action:
+      - globals.set: { id: g_alarm_cell_voltage_high, value: 'false' }
+
+  - platform: template
+    name: "Simulated Alarm: Cell Voltage Low"
+    id: switch_alarm_cell_voltage_low
+    lambda: return id(g_alarm_cell_voltage_low);
+    turn_on_action:
+      - globals.set: { id: g_alarm_cell_voltage_low, value: 'true' }
+    turn_off_action:
+      - globals.set: { id: g_alarm_cell_voltage_low, value: 'false' }
+
+  - platform: template
+    name: "Simulated Alarm: Cell Temperature High"
+    id: switch_alarm_cell_temp_high
+    lambda: return id(g_alarm_cell_temp_high);
+    turn_on_action:
+      - globals.set: { id: g_alarm_cell_temp_high, value: 'true' }
+    turn_off_action:
+      - globals.set: { id: g_alarm_cell_temp_high, value: 'false' }
+
+  - platform: template
+    name: "Simulated Alarm: Cell Temperature Low"
+    id: switch_alarm_cell_temp_low
+    lambda: return id(g_alarm_cell_temp_low);
+    turn_on_action:
+      - globals.set: { id: g_alarm_cell_temp_low, value: 'true' }
+    turn_off_action:
+      - globals.set: { id: g_alarm_cell_temp_low, value: 'false' }
+
+  - platform: template
+    name: "Simulated Alarm: MOSFET Temperature High"
+    id: switch_alarm_mosfet_temp_high
+    lambda: return id(g_alarm_mosfet_temp_high);
+    turn_on_action:
+      - globals.set: { id: g_alarm_mosfet_temp_high, value: 'true' }
+    turn_off_action:
+      - globals.set: { id: g_alarm_mosfet_temp_high, value: 'false' }
+
+  - platform: template
+    name: "Simulated Alarm: Cell Temperature Imbalance"
+    id: switch_alarm_cell_temp_imbalance
+    lambda: return id(g_alarm_cell_temp_imbalance);
+    turn_on_action:
+      - globals.set: { id: g_alarm_cell_temp_imbalance, value: 'true' }
+    turn_off_action:
+      - globals.set: { id: g_alarm_cell_temp_imbalance, value: 'false' }
+
+  - platform: template
+    name: "Simulated Alarm: Cell Imbalance"
+    id: switch_alarm_cell_imbalance
+    lambda: return id(g_alarm_cell_imbalance);
+    turn_on_action:
+      - globals.set: { id: g_alarm_cell_imbalance, value: 'true' }
+    turn_off_action:
+      - globals.set: { id: g_alarm_cell_imbalance, value: 'false' }
+
+  - platform: template
+    name: "Simulated Alarm: Charge Over Current"
+    id: switch_alarm_charge_over_current
+    lambda: return id(g_alarm_charge_over_current);
+    turn_on_action:
+      - globals.set: { id: g_alarm_charge_over_current, value: 'true' }
+    turn_off_action:
+      - globals.set: { id: g_alarm_charge_over_current, value: 'false' }
+
+  - platform: template
+    name: "Simulated Alarm: Discharge Over Current"
+    id: switch_alarm_discharge_over_current
+    lambda: return id(g_alarm_discharge_over_current);
+    turn_on_action:
+      - globals.set: { id: g_alarm_discharge_over_current, value: 'true' }
+    turn_off_action:
+      - globals.set: { id: g_alarm_discharge_over_current, value: 'false' }
+
+  # --- Protection Switches ---
+  - platform: template
+    name: "Simulated Protection: Module Overvoltage"
+    id: switch_protection_module_overvoltage
+    lambda: return id(g_protection_module_overvoltage);
+    turn_on_action:
+      - globals.set: { id: g_protection_module_overvoltage, value: 'true' }
+    turn_off_action:
+      - globals.set: { id: g_protection_module_overvoltage, value: 'false' }
+
+  - platform: template
+    name: "Simulated Protection: Module Undervoltage"
+    id: switch_protection_module_undervoltage
+    lambda: return id(g_protection_module_undervoltage);
+    turn_on_action:
+      - globals.set: { id: g_protection_module_undervoltage, value: 'true' }
+    turn_off_action:
+      - globals.set: { id: g_protection_module_undervoltage, value: 'false' }
+
+  - platform: template
+    name: "Simulated Protection: Cell Overvoltage"
+    id: switch_protection_cell_overvoltage
+    lambda: return id(g_protection_cell_overvoltage);
+    turn_on_action:
+      - globals.set: { id: g_protection_cell_overvoltage, value: 'true' }
+    turn_off_action:
+      - globals.set: { id: g_protection_cell_overvoltage, value: 'false' }
+
+  - platform: template
+    name: "Simulated Protection: Cell Undervoltage"
+    id: switch_protection_cell_undervoltage
+    lambda: return id(g_protection_cell_undervoltage);
+    turn_on_action:
+      - globals.set: { id: g_protection_cell_undervoltage, value: 'true' }
+    turn_off_action:
+      - globals.set: { id: g_protection_cell_undervoltage, value: 'false' }
+
+  - platform: template
+    name: "Simulated Protection: Cell Overtemperature"
+    id: switch_protection_cell_over_temperature
+    lambda: return id(g_protection_cell_over_temperature);
+    turn_on_action:
+      - globals.set: { id: g_protection_cell_over_temperature, value: 'true' }
+    turn_off_action:
+      - globals.set: { id: g_protection_cell_over_temperature, value: 'false' }
+
+  - platform: template
+    name: "Simulated Protection: Cell Undertemperature"
+    id: switch_protection_cell_under_temperature
+    lambda: return id(g_protection_cell_under_temperature);
+    turn_on_action:
+      - globals.set: { id: g_protection_cell_under_temperature, value: 'true' }
+    turn_off_action:
+      - globals.set: { id: g_protection_cell_under_temperature, value: 'false' }
+
+  - platform: template
+    name: "Simulated Protection: MOSFET Overtemperature"
+    id: switch_protection_mosfet_over_temperature
+    lambda: return id(g_protection_mosfet_over_temperature);
+    turn_on_action:
+      - globals.set: { id: g_protection_mosfet_over_temperature, value: 'true' }
+    turn_off_action:
+      - globals.set: { id: g_protection_mosfet_over_temperature, value: 'false' }
+
+  - platform: template
+    name: "Simulated Protection: Charge Overcurrent"
+    id: switch_protection_charge_over_current
+    lambda: return id(g_protection_charge_over_current);
+    turn_on_action:
+      - globals.set: { id: g_protection_charge_over_current, value: 'true' }
+    turn_off_action:
+      - globals.set: { id: g_protection_charge_over_current, value: 'false' }
+
+  - platform: template
+    name: "Simulated Protection: Discharge Overcurrent"
+    id: switch_protection_discharge_over_current
+    lambda: return id(g_protection_discharge_over_current);
+    turn_on_action:
+      - globals.set: { id: g_protection_discharge_over_current, value: 'true' }
+    turn_off_action:
+      - globals.set: { id: g_protection_discharge_over_current, value: 'false' }
+
+  - platform: template
+    name: "Simulated Protection: System Fault"
+    id: switch_protection_system_fault
+    lambda: return id(g_protection_system_fault);
+    turn_on_action:
+      - globals.set: { id: g_protection_system_fault, value: 'true' }
+    turn_off_action:
+      - globals.set: { id: g_protection_system_fault, value: 'false' }
 
 # ===================================================================
 # 3. Template Sensors to provide the live data
@@ -322,7 +603,141 @@ sensor:
     unit_of_measurement: "°C"
 
 # ===================================================================
-# 4. Configure the Pylontech RS485 Component
+# 4. Alarms and Warnings binary sensors
+# ===================================================================
+
+binary_sensor:
+
+  # --- Binary sensors for alarms and warnings ---
+  - platform: template
+    id: alarm_total_voltage_high
+    name: "Alarm Total Voltage High"
+    lambda: return id(g_alarm_total_voltage_high);
+    device_class: problem
+
+  - platform: template
+    id: alarm_total_voltage_low
+    name: "Alarm Total Voltage Low"
+    lambda: return id(g_alarm_total_voltage_low);
+    device_class: problem
+
+  - platform: template
+    id: alarm_cell_voltage_high
+    name: "Alarm Cell Voltage High"
+    lambda: return id(g_alarm_cell_voltage_high);
+    device_class: problem
+
+  - platform: template
+    id: alarm_cell_voltage_low
+    name: "Alarm Cell Voltage Low"
+    lambda: return id(g_alarm_cell_voltage_low);
+    device_class: problem
+
+  - platform: template
+    id: alarm_cell_temp_high
+    name: "Alarm Cell Temperature High"
+    lambda: return id(g_alarm_cell_temp_high);
+    device_class: problem
+
+  - platform: template
+    id: alarm_cell_temp_low
+    name: "Alarm Cell Temperature Low"
+    lambda: return id(g_alarm_cell_temp_low);
+    device_class: problem
+
+  - platform: template
+    id: alarm_mosfet_temp_high
+    name: "Alarm MOSFET Temperature High"
+    lambda: return id(g_alarm_mosfet_temp_high);
+    device_class: problem
+
+  - platform: template
+    id: alarm_cell_temp_imbalance
+    name: "Alarm Cell Temperature Imbalance"
+    lambda: return id(g_alarm_cell_temp_imbalance);
+    device_class: problem
+  
+  - platform: template
+    id: alarm_cell_imbalance
+    name: "Alarm Cell Imbalance"
+    lambda: return id(g_alarm_cell_imbalance);
+    device_class: problem
+
+  - platform: template
+    id: alarm_charge_over_current
+    name: "Alarm Charge Over Current"
+    lambda: return id(g_alarm_charge_over_current);
+    device_class: problem
+
+  - platform: template
+    id: alarm_discharge_over_current
+    name: "Alarm Discharge Over Current"
+    lambda: return id(g_alarm_discharge_over_current);
+    device_class: problem
+
+  # --- Binary sensors for protection module ---
+  - platform: template
+    id: protection_module_overvoltage
+    name: "Protection Module Overvoltage"
+    lambda: return id(g_protection_module_overvoltage);
+    device_class: problem
+
+  - platform: template
+    id: protection_module_undervoltage
+    name: "Protection Module Undervoltage"
+    lambda: return id(g_protection_module_undervoltage);
+    device_class: problem
+
+  - platform: template
+    id: protection_cell_overvoltage
+    name: "Protection Cell Overvoltage"
+    lambda: return id(g_protection_cell_overvoltage);
+    device_class: problem
+
+  - platform: template
+    id: protection_cell_undervoltage
+    name: "Protection Cell Undervoltage"
+    lambda: return id(g_protection_cell_undervoltage);
+    device_class: problem
+
+  - platform: template
+    id: protection_cell_over_temperature
+    name: "Protection Cell Overtemperature"
+    lambda: return id(g_protection_cell_over_temperature);
+    device_class: problem
+
+  - platform: template
+    id: protection_cell_under_temperature
+    name: "Protection Cell Undertemperature"
+    lambda: return id(g_protection_cell_under_temperature);
+    device_class: problem
+
+  - platform: template
+    id: protection_mosfet_over_temperature
+    name: "Protection MOSFET Overtemperature"
+    lambda: return id(g_protection_mosfet_over_temperature);
+    device_class: problem
+
+  - platform: template
+    id: protection_charge_over_current
+    name: "Protection Charge Overcurrent"
+    lambda: return id(g_protection_charge_over_current);
+    device_class: problem
+
+  - platform: template
+    id: protection_discharge_over_current
+    name: "Protection Discharge Overcurrent"
+    lambda: return id(g_protection_discharge_over_current);
+    device_class: problem
+
+  - platform: template
+    id: protection_system_fault
+    name: "Protection System Fault"
+    lambda: return id(g_protection_system_fault);
+    device_class: problem
+
+# ===================================================================
+# 5. Configure the Pylontech RS485 Component
 # ===================================================================
 pylontech_rs485:
   uart_id: uart_bus
@@ -356,6 +771,37 @@ pylontech_rs485:
   bms_temperature: live_bms_temp
   max_bms_temperature: live_max_bms_temp
   min_bms_temperature: live_min_bms_temp
+
+  # Alarms and warnings
+
+  # Alarm Status 1
+  total_voltage_high_alarm: alarm_total_voltage_high
+  total_voltage_low_alarm: alarm_total_voltage_low
+  cell_voltage_high_alarm: alarm_cell_voltage_high
+  cell_voltage_low_alarm: alarm_cell_voltage_low
+  cell_temp_high_alarm: alarm_cell_temp_high
+  cell_temp_low_alarm: alarm_cell_temp_low
+  mosfet_temp_high_alarm: alarm_mosfet_temp_high
+  cell_imbalance_alarm: alarm_cell_imbalance
+
+  # Alarm Status 2
+  cell_temp_imbalance_alarm: alarm_cell_temp_imbalance
+  charge_overcurrent_alarm: alarm_charge_over_current
+  discharge_overcurrent_alarm: alarm_discharge_over_current
+
+  # Protection Status 1
+  module_overvoltage_protection: protection_module_overvoltage
+  module_undervoltage_protection: protection_module_undervoltage
+  cell_overvoltage_protection: protection_cell_overvoltage
+  cell_undervoltage_protection: protection_cell_undervoltage
+  cell_overtemp_protection: protection_cell_over_temperature
+  cell_undertemp_protection: protection_cell_under_temperature
+  mosfet_overtemp_protection: protection_mosfet_over_temperature
+
+  # Protection Status 2
+  charge_overcurrent_protection: protection_charge_over_current
+  discharge_overcurrent_protection: protection_discharge_over_current
+  system_fault_protection: protection_system_fault
 
   # Dynamic battery limits (for command 63)
   max_voltage: live_max_v

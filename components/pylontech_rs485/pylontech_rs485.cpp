@@ -36,6 +36,27 @@ void PylontechRS485::dump_config() {
   LOG_SENSOR("  ", "Min Voltage (Limit) Sensor", this->min_voltage_sensor_);
   LOG_SENSOR("  ", "Max Charge Current Sensor", this->max_charge_current_sensor_);
   LOG_SENSOR("  ", "Max Discharge Current Sensor", this->max_discharge_current_sensor_);
+  LOG_BINARY_SENSOR("  ", "Total Voltage High Alarm", this->total_voltage_high_alarm_);
+  LOG_BINARY_SENSOR("  ", "Total Voltage Low Alarm", this->total_voltage_low_alarm_);
+  LOG_BINARY_SENSOR("  ", "Cell Voltage High Alarm", this->cell_voltage_high_alarm_);
+  LOG_BINARY_SENSOR("  ", "Cell Voltage Low Alarm", this->cell_voltage_low_alarm_);
+  LOG_BINARY_SENSOR("  ", "Cell Temperature High Alarm", this->cell_temp_high_alarm_);
+  LOG_BINARY_SENSOR("  ", "Cell Temperature Low Alarm", this->cell_temp_low_alarm_);
+  LOG_BINARY_SENSOR("  ", "MOSFET Temperature High Alarm", this->mosfet_temp_high_alarm_);
+  LOG_BINARY_SENSOR("  ", "Cell Imbalance Alarm", this->cell_imbalance_alarm_);
+  LOG_BINARY_SENSOR("  ", "Cell Temperature Imbalance Alarm", this->cell_temp_imbalance_alarm_);
+  LOG_BINARY_SENSOR("  ", "Charge Overcurrent Alarm", this->charge_overcurrent_alarm_);
+  LOG_BINARY_SENSOR("  ", "Discharge Overcurrent Alarm", this->discharge_overcurrent_alarm_);
+  LOG_BINARY_SENSOR("  ", "Module Overvoltage Protection", this->module_overvoltage_protection_);
+  LOG_BINARY_SENSOR("  ", "Module Undervoltage Protection", this->module_undervoltage_protection_);
+  LOG_BINARY_SENSOR("  ", "Cell Overvoltage Protection", this->cell_overvoltage_protection_);
+  LOG_BINARY_SENSOR("  ", "Cell Undervoltage Protection", this->cell_undervoltage_protection_);
+  LOG_BINARY_SENSOR("  ", "Cell Overtemperature Protection", this->cell_overtemp_protection_);
+  LOG_BINARY_SENSOR("  ", "Cell Undertemperature Protection", this->cell_undertemp_protection_);
+  LOG_BINARY_SENSOR("  ", "MOSFET Overtemperature Protection", this->mosfet_overtemp_protection_);
+  LOG_BINARY_SENSOR("  ", "Charge Overcurrent Protection", this->charge_overcurrent_protection_);
+  LOG_BINARY_SENSOR("  ", "Discharge Overcurrent Protection", this->discharge_overcurrent_protection_);
+  LOG_BINARY_SENSOR("  ", "System Fault Protection", this->system_fault_protection_);
 }
 
 float PylontechRS485::get_setup_priority() const { return setup_priority::LATE; }
@@ -188,11 +209,59 @@ void PylontechRS485::handle_command_61_() {
   this->write_str(full_frame.c_str());
 }
 
-// --- handle_command_62_() and handle_command_63_() remain the same for now ---
 void PylontechRS485::handle_command_62_() {
-  std::string info_payload = "00000000"; // Placeholder for alarms
-  std::string length_field = this->calculate_length_field_(info_payload.length());
-  std::string frame_data = PROTOCOL_VERSION + RESPONSE_ADDRESS + "4600" + length_field + info_payload;
+
+  // Byte 1: System Alarm Status 1
+  // Byte 2: System Alarm Status 2
+  // Byte 3: System Protection Status 1
+  // Byte 4: System Protection Status 2
+
+  // Initialize all status bytes to 0 (normal/no trigger)
+  uint8_t alarm_status_1 = 0;
+  uint8_t alarm_status_2 = 0;
+  uint8_t protection_status_1 = 0;
+  uint8_t protection_status_2 = 0;
+
+  // --- Populate Alarm Status 1 ---
+  // Check each binary sensor and set the corresponding bit if true.
+  if (this->total_voltage_high_alarm_ && this->total_voltage_high_alarm_->state) { alarm_status_1 |= (1 << 7); }
+  if (this->total_voltage_low_alarm_ && this->total_voltage_low_alarm_->state) { alarm_status_1 |= (1 << 6); }
+  if (this->cell_voltage_high_alarm_ && this->cell_voltage_high_alarm_->state) { alarm_status_1 |= (1 << 5); }
+  if (this->cell_voltage_low_alarm_ && this->cell_voltage_low_alarm_->state) { alarm_status_1 |= (1 << 4); }
+  if (this->cell_temp_high_alarm_ && this->cell_temp_high_alarm_->state) { alarm_status_1 |= (1 << 3); }
+  if (this->cell_temp_low_alarm_ && this->cell_temp_low_alarm_->state) { alarm_status_1 |= (1 << 2); }
+  if (this->mosfet_temp_high_alarm_ && this->mosfet_temp_high_alarm_->state) { alarm_status_1 |= (1 << 1); }
+  if (this->cell_imbalance_alarm_ && this->cell_imbalance_alarm_->state) { alarm_status_1 |= (1 << 0); }
+
+  // --- Populate Alarm Status 2 ---
+  if (this->cell_temp_imbalance_alarm_ && this->cell_temp_imbalance_alarm_->state) { alarm_status_2 |= (1 << 7); }
+  if (this->charge_overcurrent_alarm_ && this->charge_overcurrent_alarm_->state) { alarm_status_2 |= (1 << 6); }
+  if (this->discharge_overcurrent_alarm_ && this->discharge_overcurrent_alarm_->state) { alarm_status_2 |= (1 << 5); }
+  // Bit 4 is 'Internal communication error', we can leave this as 0 for now.
+
+  // --- Populate Protection Status 1 ---
+  if (this->module_overvoltage_protection_ && this->module_overvoltage_protection_->state) { protection_status_1 |= (1 << 7); }
+  if (this->module_undervoltage_protection_ && this->module_undervoltage_protection_->state) { protection_status_1 |= (1 << 6); }
+  if (this->cell_overvoltage_protection_ && this->cell_overvoltage_protection_->state) { protection_status_1 |= (1 << 5); }
+  if (this->cell_undervoltage_protection_ && this->cell_undervoltage_protection_->state) { protection_status_1 |= (1 << 4); }
+  if (this->cell_overtemp_protection_ && this->cell_overtemp_protection_->state) { protection_status_1 |= (1 << 3); }
+  if (this->cell_undertemp_protection_ && this->cell_undertemp_protection_->state) { protection_status_1 |= (1 << 2); }
+  if (this->mosfet_overtemp_protection_ && this->mosfet_overtemp_protection_->state) { protection_status_1 |= (1 << 1); }
+
+  // --- Populate Protection Status 2 ---
+  if (this->charge_overcurrent_protection_ && this->charge_overcurrent_protection_->state) { protection_status_2 |= (1 << 6); }
+  if (this->discharge_overcurrent_protection_ && this->discharge_overcurrent_protection_->state) { protection_status_2 |= (1 << 5); }
+  if (this->system_fault_protection_ && this->system_fault_protection_->state) { protection_status_2 |= (1 << 3); }
+
+  // Build the INFO payload string from the four status bytes.
+  // The payload is 4 bytes, which is 8 ASCII characters in HEX.
+  char info_payload[9];
+  snprintf(info_payload, sizeof(info_payload), "%02X%02X%02X%02X", 
+           alarm_status_1, alarm_status_2, protection_status_1, protection_status_2);
+
+  std::string info_payload_str(info_payload);
+  std::string length_field = this->calculate_length_field_(info_payload_str.length());
+  std::string frame_data = PROTOCOL_VERSION + RESPONSE_ADDRESS + "4600" + length_field + info_payload_str;
   std::string checksum = this->calculate_checksum_(frame_data);
   std::string full_frame = "~" + frame_data + checksum + "\r";
   this->write_str(full_frame.c_str());
