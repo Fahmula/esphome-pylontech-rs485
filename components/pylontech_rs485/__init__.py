@@ -1,6 +1,6 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import uart, sensor
+from esphome.components import uart, sensor, binary_sensor
 from esphome.const import CONF_ID
 
 pylontech_rs485_ns = cg.esphome_ns.namespace("esphome::pylontech_rs485")
@@ -42,6 +42,28 @@ CONF_MIN_BMS_TEMPERATURE = "min_bms_temperature"
 # --- Component-specific settings ---
 CONF_UPDATE_TIMEOUT = "update_timeout"
 
+# --- Binary Sensor Configuration Constants ---
+CONF_TOTAL_VOLTAGE_HIGH_ALARM = "total_voltage_high_alarm"
+CONF_TOTAL_VOLTAGE_LOW_ALARM = "total_voltage_low_alarm"
+CONF_CELL_VOLTAGE_HIGH_ALARM = "cell_voltage_high_alarm"
+CONF_CELL_VOLTAGE_LOW_ALARM = "cell_voltage_low_alarm"
+CONF_CELL_TEMP_HIGH_ALARM = "cell_temp_high_alarm"
+CONF_CELL_TEMP_LOW_ALARM = "cell_temp_low_alarm"
+CONF_MOSFET_TEMP_HIGH_ALARM = "mosfet_temp_high_alarm"
+CONF_CELL_TEMP_IMBALANCE_ALARM = "cell_temp_imbalance_alarm"
+CONF_CELL_IMBALANCE_ALARM = "cell_imbalance_alarm"
+CONF_CHARGE_OVERCURRENT_ALARM = "charge_overcurrent_alarm"
+CONF_DISCHARGE_OVERCURRENT_ALARM = "discharge_overcurrent_alarm"
+CONF_MODULE_OVERVOLTAGE_PROTECTION = "module_overvoltage_protection"
+CONF_MODULE_UNDERVOLTAGE_PROTECTION = "module_undervoltage_protection"
+CONF_CELL_OVERVOLTAGE_PROTECTION = "cell_overvoltage_protection"
+CONF_CELL_UNDERVOLTAGE_PROTECTION = "cell_undervoltage_protection"
+CONF_CELL_OVERTEMP_PROTECTION = "cell_overtemp_protection"
+CONF_CELL_UNDERTEMP_PROTECTION = "cell_undertemp_protection"
+CONF_MOSFET_OVERTEMP_PROTECTION = "mosfet_overtemp_protection"
+CONF_CHARGE_OVERCURRENT_PROTECTION = "charge_overcurrent_protection"
+CONF_DISCHARGE_OVERCURRENT_PROTECTION = "discharge_overcurrent_protection"
+CONF_SYSTEM_FAULT_PROTECTION = "system_fault_protection"
 
 # --- Sensor Schema ---
 SENSOR_KEYS_SCHEMA = cv.Schema(
@@ -63,7 +85,31 @@ SENSOR_KEYS_SCHEMA = cv.Schema(
         cv.Optional(CONF_BMS_TEMPERATURE): cv.use_id(sensor.Sensor),
         cv.Optional(CONF_MAX_BMS_TEMPERATURE): cv.use_id(sensor.Sensor),
         cv.Optional(CONF_MIN_BMS_TEMPERATURE): cv.use_id(sensor.Sensor),
-        
+
+        # --- Binary sensors for alarms and protections ---
+        cv.Optional(CONF_TOTAL_VOLTAGE_HIGH_ALARM): cv.use_id(binary_sensor.BinarySensor),
+        cv.Optional(CONF_TOTAL_VOLTAGE_LOW_ALARM): cv.use_id(binary_sensor.BinarySensor),
+        cv.Optional(CONF_CELL_VOLTAGE_HIGH_ALARM): cv.use_id(binary_sensor.BinarySensor),
+        cv.Optional(CONF_CELL_VOLTAGE_LOW_ALARM): cv.use_id(binary_sensor.BinarySensor),
+        cv.Optional(CONF_CELL_TEMP_HIGH_ALARM): cv.use_id(binary_sensor.BinarySensor),
+        cv.Optional(CONF_CELL_TEMP_LOW_ALARM): cv.use_id(binary_sensor.BinarySensor),
+        cv.Optional(CONF_MOSFET_TEMP_HIGH_ALARM): cv.use_id(binary_sensor.BinarySensor),
+        cv.Optional(CONF_CELL_TEMP_IMBALANCE_ALARM): cv.use_id(binary_sensor.BinarySensor),
+        cv.Optional(CONF_CELL_IMBALANCE_ALARM): cv.use_id(binary_sensor.BinarySensor),
+        cv.Optional(CONF_CHARGE_OVERCURRENT_ALARM): cv.use_id(binary_sensor.BinarySensor),
+        cv.Optional(CONF_DISCHARGE_OVERCURRENT_ALARM): cv.use_id(binary_sensor.BinarySensor),
+        cv.Optional(CONF_MODULE_OVERVOLTAGE_PROTECTION): cv.use_id(binary_sensor.BinarySensor),
+        cv.Optional(CONF_MODULE_UNDERVOLTAGE_PROTECTION): cv.use_id(binary_sensor.BinarySensor),
+        cv.Optional(CONF_CELL_OVERVOLTAGE_PROTECTION): cv.use_id(binary_sensor.BinarySensor),
+        cv.Optional(CONF_CELL_UNDERVOLTAGE_PROTECTION): cv.use_id(binary_sensor.BinarySensor),
+        cv.Optional(CONF_CELL_OVERTEMP_PROTECTION): cv.use_id(binary_sensor.BinarySensor),
+        cv.Optional(CONF_CELL_UNDERTEMP_PROTECTION): cv.use_id(binary_sensor.BinarySensor),
+        cv.Optional(CONF_MOSFET_OVERTEMP_PROTECTION): cv.use_id(binary_sensor.BinarySensor),
+        cv.Optional(CONF_CHARGE_OVERCURRENT_PROTECTION): cv.use_id(binary_sensor.BinarySensor),
+        cv.Optional(CONF_DISCHARGE_OVERCURRENT_PROTECTION): cv.use_id(binary_sensor.BinarySensor),
+        cv.Optional(CONF_SYSTEM_FAULT_PROTECTION): cv.use_id(binary_sensor.BinarySensor),
+
+        # --- Dynamic limit sensors ---
         cv.Optional(CONF_MAX_VOLTAGE): cv.use_id(sensor.Sensor),
         cv.Optional(CONF_MIN_VOLTAGE): cv.use_id(sensor.Sensor),
         cv.Optional(CONF_MAX_CHARGE_CURRENT): cv.use_id(sensor.Sensor),
@@ -117,8 +163,43 @@ async def to_code(config):
         CONF_MAX_DISCHARGE_CURRENT: "set_max_discharge_current_sensor",
     }
 
-    # Loop through the map and generate code if the key exists in the config
+    # This maps the YAML key to the C++ setter function name for BINARY sensors.
+    BINARY_SENSOR_MAP = {
+        # Alarm Status 1
+        CONF_TOTAL_VOLTAGE_HIGH_ALARM: "set_total_voltage_high_alarm",
+        CONF_TOTAL_VOLTAGE_LOW_ALARM: "set_total_voltage_low_alarm",
+        CONF_CELL_VOLTAGE_HIGH_ALARM: "set_cell_voltage_high_alarm",
+        CONF_CELL_VOLTAGE_LOW_ALARM: "set_cell_voltage_low_alarm",
+        CONF_CELL_TEMP_HIGH_ALARM: "set_cell_temp_high_alarm",
+        CONF_CELL_TEMP_LOW_ALARM: "set_cell_temp_low_alarm",
+        CONF_MOSFET_TEMP_HIGH_ALARM: "set_mosfet_temp_high_alarm",
+        CONF_CELL_IMBALANCE_ALARM: "set_cell_imbalance_alarm",
+        # Alarm Status 2
+        CONF_CELL_TEMP_IMBALANCE_ALARM: "set_cell_temp_imbalance_alarm",
+        CONF_CHARGE_OVERCURRENT_ALARM: "set_charge_overcurrent_alarm",
+        CONF_DISCHARGE_OVERCURRENT_ALARM: "set_discharge_overcurrent_alarm",
+        # Protection Status 1
+        CONF_MODULE_OVERVOLTAGE_PROTECTION: "set_module_overvoltage_protection",
+        CONF_MODULE_UNDERVOLTAGE_PROTECTION: "set_module_undervoltage_protection",
+        CONF_CELL_OVERVOLTAGE_PROTECTION: "set_cell_overvoltage_protection",
+        CONF_CELL_UNDERVOLTAGE_PROTECTION: "set_cell_undervoltage_protection",
+        CONF_CELL_OVERTEMP_PROTECTION: "set_cell_overtemp_protection",
+        CONF_CELL_UNDERTEMP_PROTECTION: "set_cell_undertemp_protection",
+        CONF_MOSFET_OVERTEMP_PROTECTION: "set_mosfet_overtemp_protection",
+        # Protection Status 2
+        CONF_CHARGE_OVERCURRENT_PROTECTION: "set_charge_overcurrent_protection",
+        CONF_DISCHARGE_OVERCURRENT_PROTECTION: "set_discharge_overcurrent_protection",
+        CONF_SYSTEM_FAULT_PROTECTION: "set_system_fault_protection",
+    }
+
+    # Loop through the SENSOR_MAP and generate code for sensors
     for key, setter_name in SENSOR_MAP.items():
+        if key in config:
+            sens = await cg.get_variable(config[key])
+            cg.add(getattr(var, setter_name)(sens))
+
+    # Loop through the BINARY_SENSOR_MAP and generate code for binary sensors
+    for key, setter_name in BINARY_SENSOR_MAP.items():
         if key in config:
             sens = await cg.get_variable(config[key])
             cg.add(getattr(var, setter_name)(sens))

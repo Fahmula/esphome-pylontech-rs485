@@ -3,6 +3,7 @@
 #include "esphome/core/component.h"
 #include "esphome/components/uart/uart.h"
 #include "esphome/components/sensor/sensor.h"
+#include "esphome/components/binary_sensor/binary_sensor.h"
 
 namespace esphome {
 namespace pylontech_rs485 {
@@ -35,6 +36,29 @@ class PylontechRS485 : public Component, public uart::UARTDevice {
   void set_bms_temperature_sensor(sensor::Sensor *sensor) { this->bms_temperature_sensor_ = sensor; }
   void set_max_bms_temperature_sensor(sensor::Sensor *sensor) { this->max_bms_temperature_sensor_ = sensor; }
   void set_min_bms_temperature_sensor(sensor::Sensor *sensor) { this->min_bms_temperature_sensor_ = sensor; }
+
+  // --- Setters for Binary Sensors ---
+  void set_total_voltage_high_alarm(binary_sensor::BinarySensor *sensor) { this->total_voltage_high_alarm_ = sensor; }
+  void set_total_voltage_low_alarm(binary_sensor::BinarySensor *sensor) { this->total_voltage_low_alarm_ = sensor; }
+  void set_cell_voltage_high_alarm(binary_sensor::BinarySensor *sensor) { this->cell_voltage_high_alarm_ = sensor; }
+  void set_cell_voltage_low_alarm(binary_sensor::BinarySensor *sensor) { this->cell_voltage_low_alarm_ = sensor; }
+  void set_cell_temp_high_alarm(binary_sensor::BinarySensor *sensor) { this->cell_temp_high_alarm_ = sensor; }
+  void set_cell_temp_low_alarm(binary_sensor::BinarySensor *sensor) { this->cell_temp_low_alarm_ = sensor; }
+  void set_mosfet_temp_high_alarm(binary_sensor::BinarySensor *sensor) { this->mosfet_temp_high_alarm_ = sensor; }
+  void set_cell_imbalance_alarm(binary_sensor::BinarySensor *sensor) { this->cell_imbalance_alarm_ = sensor; }
+  void set_cell_temp_imbalance_alarm(binary_sensor::BinarySensor *sensor) { this->cell_temp_imbalance_alarm_ = sensor; }
+  void set_charge_overcurrent_alarm(binary_sensor::BinarySensor *sensor) { this->charge_overcurrent_alarm_ = sensor; }
+  void set_discharge_overcurrent_alarm(binary_sensor::BinarySensor *sensor) { this->discharge_overcurrent_alarm_ = sensor; }
+  void set_module_overvoltage_protection(binary_sensor::BinarySensor *sensor) { this->module_overvoltage_protection_ = sensor; }
+  void set_module_undervoltage_protection(binary_sensor::BinarySensor *sensor) { this->module_undervoltage_protection_ = sensor; }
+  void set_cell_overvoltage_protection(binary_sensor::BinarySensor *sensor) { this->cell_overvoltage_protection_ = sensor; }
+  void set_cell_undervoltage_protection(binary_sensor::BinarySensor *sensor) { this->cell_undervoltage_protection_ = sensor; }
+  void set_cell_overtemp_protection(binary_sensor::BinarySensor *sensor) { this->cell_overtemp_protection_ = sensor; }
+  void set_cell_undertemp_protection(binary_sensor::BinarySensor *sensor) { this->cell_undertemp_protection_ = sensor; }
+  void set_mosfet_overtemp_protection(binary_sensor::BinarySensor *sensor) { this->mosfet_overtemp_protection_ = sensor; }
+  void set_charge_overcurrent_protection(binary_sensor::BinarySensor *sensor) { this->charge_overcurrent_protection_ = sensor; }
+  void set_discharge_overcurrent_protection(binary_sensor::BinarySensor *sensor) { this->discharge_overcurrent_protection_ = sensor; }
+  void set_system_fault_protection(binary_sensor::BinarySensor *sensor) { this->system_fault_protection_ = sensor; }
   
   // Setters for dynamic limits
   void set_max_voltage_sensor(sensor::Sensor *sensor) { this->max_voltage_sensor_ = sensor; }
@@ -87,6 +111,30 @@ class PylontechRS485 : public Component, public uart::UARTDevice {
   sensor::Sensor *max_bms_temperature_sensor_{nullptr};
   sensor::Sensor *min_bms_temperature_sensor_{nullptr};
 
+  // --- Pointers for Binary Sensors ---
+  binary_sensor::BinarySensor *total_voltage_high_alarm_{nullptr};
+  binary_sensor::BinarySensor *total_voltage_low_alarm_{nullptr};
+  binary_sensor::BinarySensor *cell_voltage_high_alarm_{nullptr};
+  binary_sensor::BinarySensor *cell_voltage_low_alarm_{nullptr};
+  binary_sensor::BinarySensor *cell_temp_high_alarm_{nullptr};
+  binary_sensor::BinarySensor *cell_temp_low_alarm_{nullptr};
+  binary_sensor::BinarySensor *mosfet_temp_high_alarm_{nullptr};
+  binary_sensor::BinarySensor *cell_imbalance_alarm_{nullptr};
+  binary_sensor::BinarySensor *cell_temp_imbalance_alarm_{nullptr};
+  binary_sensor::BinarySensor *charge_overcurrent_alarm_{nullptr};
+  binary_sensor::BinarySensor *discharge_overcurrent_alarm_{nullptr};
+  binary_sensor::BinarySensor *module_overvoltage_protection_{nullptr};
+  binary_sensor::BinarySensor *module_undervoltage_protection_{nullptr};
+  binary_sensor::BinarySensor *cell_overvoltage_protection_{nullptr};
+  binary_sensor::BinarySensor *cell_undervoltage_protection_{nullptr};
+  binary_sensor::BinarySensor *cell_overtemp_protection_{nullptr};
+  binary_sensor::BinarySensor *cell_undertemp_protection_{nullptr};
+  binary_sensor::BinarySensor *mosfet_overtemp_protection_{nullptr};
+  binary_sensor::BinarySensor *charge_overcurrent_protection_{nullptr};
+  binary_sensor::BinarySensor *discharge_overcurrent_protection_{nullptr};
+  binary_sensor::BinarySensor *system_fault_protection_{nullptr};
+
+  // --- Pointers for dynamic limit sensors ---
   sensor::Sensor *max_voltage_sensor_{nullptr};
   sensor::Sensor *min_voltage_sensor_{nullptr};
   sensor::Sensor *max_charge_current_sensor_{nullptr};
