@@ -7,7 +7,7 @@ esphome:
   friendly_name: "Pylontech Emulator"
   
 external_components:
-  - source: github://fahmula/esphome-pylontech-rs485@next
+  - source: github://fahmula/esphome-pylontech-rs485@main
     refresh: 0s
 
 esp32:

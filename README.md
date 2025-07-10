@@ -42,7 +42,7 @@ To include this component in your ESPHome project, add the following to your YAM
 
 ```yaml
 external_components:
-  - source: github://fahmula/esphome-pylontech-rs485@next
+  - source: github://fahmula/esphome-pylontech-rs485@main
     refresh: 0s # Optional: Set to a duration (e.g., 1h) to periodically check for updates
 ```
 
