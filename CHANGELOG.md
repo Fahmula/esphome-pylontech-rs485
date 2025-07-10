@@ -1,3 +1,23 @@
+# [1.2.0-rc.2](https://github.com/Fahmula/esphome-pylontech-rs485/compare/v1.2.0-rc.1...v1.2.0-rc.2) (2025-07-09)
+
+
+### Features
+
+* Add alarm and protection binary sensors ([00c5990](https://github.com/Fahmula/esphome-pylontech-rs485/commit/00c5990a5703b9805768c77ea39fe7bf4182715c))
+
+# [1.2.0-rc.1](https://github.com/Fahmula/esphome-pylontech-rs485/compare/v1.1.0...v1.2.0-rc.1) (2025-07-08)
+
+
+### Bug Fixes
+
+* Resolve compilation error by merging Python scripts ([08e0fa1](https://github.com/Fahmula/esphome-pylontech-rs485/commit/08e0fa17bb03cac1a79d334abdf7acdd3864ef85))
+
+
+### Features
+
+* Add full Pylontech protocol compliance sensors ([7abbd0a](https://github.com/Fahmula/esphome-pylontech-rs485/commit/7abbd0ad3d3ac0f3c2f04eab8a25399f97791bef))
+* Support optional Pylontech RS485 sensors ([c8b55c1](https://github.com/Fahmula/esphome-pylontech-rs485/commit/c8b55c1b1ebb8e30b74e41fa864933ac12813be5))
+
 # [1.1.0](https://github.com/Fahmula/esphome-pylontech-rs485/compare/v1.0.0...v1.1.0) (2025-07-07)
 
 
