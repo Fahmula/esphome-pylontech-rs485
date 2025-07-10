@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/Fahmula/esphome-pylontech-rs485/compare/v1.1.0...v1.2.0) (2025-07-10)
+
+
+### Features
+
+* Enhance Pylontech RS485 sensor support and compliance ([#10](https://github.com/Fahmula/esphome-pylontech-rs485/issues/10)) ([6b7c799](https://github.com/Fahmula/esphome-pylontech-rs485/commit/6b7c79907389c0036879354409804a7a06678c58))
+
 # [1.2.0-rc.2](https://github.com/Fahmula/esphome-pylontech-rs485/compare/v1.2.0-rc.1...v1.2.0-rc.2) (2025-07-09)
 
 
