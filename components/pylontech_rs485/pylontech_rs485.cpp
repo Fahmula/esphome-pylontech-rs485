@@ -284,14 +284,18 @@ void PylontechRS485::handle_command_63_() {
   std::string checksum = this->calculate_checksum_(frame_data);
   std::string full_frame = "~" + frame_data + checksum + "\r";
   this->write_str(full_frame.c_str());
+
   // Update heartbeat and com status
   uint32_t now = millis();
   if (this->last_cmd63_ms_ > 0 && this->inverter_heartbeat_ != nullptr) {
-    if (id(rs485_switch_inverter_heartbeat_monitoring).state) {
-    uint32_t interval = now - this->last_cmd63_ms_;
-    this->inverter_heartbeat_->publish_state(interval);
+    if (this->heartbeat_switch_ != nullptr && this->heartbeat_switch_->state) {
+      uint32_t interval = now - this->last_cmd63_ms_;
+      this->inverter_heartbeat_->publish_state(interval);
+    }
   }
+
   this->last_cmd63_ms_ = now;
+
   if (this->inverter_com_status_ != nullptr) {
     this->inverter_com_status_->publish_state(true);
   }
