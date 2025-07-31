@@ -19,7 +19,12 @@ class PylontechRS485 : public Component, public uart::UARTDevice {
   // --- Setter for component-specific settings ---
   void set_update_timeout(uint32_t timeout) { this->update_timeout_ms_ = timeout; }
 
-  // --- Setters for ALL the sensors defined in the Python schema ---
+  // --- Setters for RS485 link monitoring sensors & switch ---
+  void set_inverter_com_status(binary_sensor::BinarySensor *sensor) { this->inverter_com_status_ = sensor; }
+  void set_inverter_heartbeat(sensor::Sensor *sensor) { this->inverter_heartbeat_ = sensor; }
+  void set_heartbeat_switch(switch_::Switch *sw) { this->heartbeat_switch_ = sw; }
+
+  // --- Setters for sensors ---
   void set_soc_sensor(sensor::Sensor *sensor) { this->soc_sensor_ = sensor; }
   void set_voltage_sensor(sensor::Sensor *sensor) { this->voltage_sensor_ = sensor; }
   void set_current_sensor(sensor::Sensor *sensor) { this->current_sensor_ = sensor; }
@@ -79,6 +84,7 @@ class PylontechRS485 : public Component, public uart::UARTDevice {
   // --- Member variables for state ---
   uint32_t last_update_ms_{0};
   uint32_t update_timeout_ms_{60000};
+  uint32_t last_cmd63_ms_{0};
   bool is_data_valid_{false};
   std::string rx_buffer_;
 
@@ -91,6 +97,11 @@ class PylontechRS485 : public Component, public uart::UARTDevice {
   uint16_t min_discharge_v_mv_{0};
   uint16_t max_charge_i_ca_{0};
   uint16_t max_discharge_i_ca_{0};
+
+  // --- Pointers to the heartbeat sensors & switch ---
+  sensor::Sensor *inverter_heartbeat_{nullptr};
+  binary_sensor::BinarySensor *inverter_com_status_{nullptr};
+  switch_::Switch *heartbeat_switch_{nullptr};
 
   // --- Pointers to all the sensors from the YAML config ---
   // Initialize them all to nullptr to be safe.

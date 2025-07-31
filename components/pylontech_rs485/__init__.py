@@ -1,12 +1,18 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import uart, sensor, binary_sensor
+from esphome.components import uart, sensor, binary_sensor, switch
 from esphome.const import CONF_ID
 
 pylontech_rs485_ns = cg.esphome_ns.namespace("esphome::pylontech_rs485")
 PylontechRS485 = pylontech_rs485_ns.class_("PylontechRS485", cg.Component, uart.UARTDevice)
 
 # --- Sensor Configuration Constants ---
+
+# --- RS485 Link Monitoring ---
+CONF_INVERTER_HEARTBEAT = "inverter_heartbeat"
+CONF_INVERTER_COM_STATUS = "inverter_com_status"
+CONF_HEARTBEAT_SWITCH = "heartbeat_switch"
+
 # --- Primary dynamic values ---
 CONF_STATE_OF_CHARGE = "state_of_charge"
 CONF_VOLTAGE = "voltage"
@@ -85,6 +91,8 @@ SENSOR_KEYS_SCHEMA = cv.Schema(
         cv.Optional(CONF_BMS_TEMPERATURE): cv.use_id(sensor.Sensor),
         cv.Optional(CONF_MAX_BMS_TEMPERATURE): cv.use_id(sensor.Sensor),
         cv.Optional(CONF_MIN_BMS_TEMPERATURE): cv.use_id(sensor.Sensor),
+        # --- RS485 link monitoring sensor ---
+        cv.Optional(CONF_INVERTER_HEARTBEAT): cv.use_id(sensor.Sensor),
 
         # --- Binary sensors for alarms and protections ---
         cv.Optional(CONF_TOTAL_VOLTAGE_HIGH_ALARM): cv.use_id(binary_sensor.BinarySensor),
@@ -108,6 +116,10 @@ SENSOR_KEYS_SCHEMA = cv.Schema(
         cv.Optional(CONF_CHARGE_OVERCURRENT_PROTECTION): cv.use_id(binary_sensor.BinarySensor),
         cv.Optional(CONF_DISCHARGE_OVERCURRENT_PROTECTION): cv.use_id(binary_sensor.BinarySensor),
         cv.Optional(CONF_SYSTEM_FAULT_PROTECTION): cv.use_id(binary_sensor.BinarySensor),
+        # --- RS485 link monitoring binary sensor ---
+        cv.Optional(CONF_INVERTER_COM_STATUS): cv.use_id(binary_sensor.BinarySensor),
+        # --- RS485 heartbeat switch ---
+        cv.Optional(CONF_HEARTBEAT_SWITCH): cv.use_id(switch.Switch),
 
         # --- Dynamic limit sensors ---
         cv.Optional(CONF_MAX_VOLTAGE): cv.use_id(sensor.Sensor),
@@ -161,6 +173,8 @@ async def to_code(config):
         CONF_MIN_VOLTAGE: "set_min_voltage_sensor",
         CONF_MAX_CHARGE_CURRENT: "set_max_charge_current_sensor",
         CONF_MAX_DISCHARGE_CURRENT: "set_max_discharge_current_sensor",
+        # RS485 link monitoring sensors
+        CONF_INVERTER_HEARTBEAT: "set_inverter_heartbeat",
     }
 
     # This maps the YAML key to the C++ setter function name for BINARY sensors.
@@ -190,7 +204,14 @@ async def to_code(config):
         CONF_CHARGE_OVERCURRENT_PROTECTION: "set_charge_overcurrent_protection",
         CONF_DISCHARGE_OVERCURRENT_PROTECTION: "set_discharge_overcurrent_protection",
         CONF_SYSTEM_FAULT_PROTECTION: "set_system_fault_protection",
+        # RS485 link monitoring binary sensor
+        CONF_INVERTER_COM_STATUS: "set_inverter_com_status",
     }
+
+    SWITCH_MAP = {
+        CONF_HEARTBEAT_SWITCH: "set_heartbeat_switch",
+    }
+
 
     # Loop through the SENSOR_MAP and generate code for sensors
     for key, setter_name in SENSOR_MAP.items():
@@ -203,6 +224,12 @@ async def to_code(config):
         if key in config:
             sens = await cg.get_variable(config[key])
             cg.add(getattr(var, setter_name)(sens))
+
+    # Loop through the SWITCH_MAP and generate code for switches
+    for key, setter_name in SWITCH_MAP.items():
+        if key in config:
+            sw = await cg.get_variable(config[key])
+            cg.add(getattr(var, setter_name)(sw))
 
     # Set the update timeout
     cg.add(var.set_update_timeout(config[CONF_UPDATE_TIMEOUT]))

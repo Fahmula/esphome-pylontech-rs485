@@ -16,6 +16,7 @@ void PylontechRS485::dump_config() {
   ESP_LOGCONFIG(TAG, "  UART Bus is configured.");
   ESP_LOGCONFIG(TAG, "  Update Timeout: %u ms", this->update_timeout_ms_);
   // Log all configured sensors
+  LOG_SENSOR("  ", "Inverter Heartbeat Sensor", this->inverter_heartbeat_);
   LOG_SENSOR("  ", "SoC Sensor", this->soc_sensor_);
   LOG_SENSOR("  ", "Voltage Sensor", this->voltage_sensor_);
   LOG_SENSOR("  ", "Current Sensor", this->current_sensor_);
@@ -57,6 +58,7 @@ void PylontechRS485::dump_config() {
   LOG_BINARY_SENSOR("  ", "Charge Overcurrent Protection", this->charge_overcurrent_protection_);
   LOG_BINARY_SENSOR("  ", "Discharge Overcurrent Protection", this->discharge_overcurrent_protection_);
   LOG_BINARY_SENSOR("  ", "System Fault Protection", this->system_fault_protection_);
+  LOG_BINARY_SENSOR("  ", "Inverter Communication Status", this->inverter_com_status_);
 }
 
 float PylontechRS485::get_setup_priority() const { return setup_priority::LATE; }
@@ -73,6 +75,10 @@ void PylontechRS485::loop() {
   if (this->is_data_valid_ && (millis() - this->last_update_ms_ > this->update_timeout_ms_)) {
     ESP_LOGW(TAG, "Sensor data timeout! Halting communication to trigger fail-safe.");
     this->is_data_valid_ = false;
+    // Update com status
+    if (this->inverter_com_status_ != nullptr) {
+      this->inverter_com_status_->publish_state(false);
+    }
   }
 
   while (this->available()) {
@@ -278,6 +284,17 @@ void PylontechRS485::handle_command_63_() {
   std::string checksum = this->calculate_checksum_(frame_data);
   std::string full_frame = "~" + frame_data + checksum + "\r";
   this->write_str(full_frame.c_str());
+  // Update heartbeat and com status
+  uint32_t now = millis();
+  if (this->last_cmd63_ms_ > 0 && this->inverter_heartbeat_ != nullptr) {
+    if (id(rs485_switch_inverter_heartbeat_monitoring).state) {
+    uint32_t interval = now - this->last_cmd63_ms_;
+    this->inverter_heartbeat_->publish_state(interval);
+  }
+  this->last_cmd63_ms_ = now;
+  if (this->inverter_com_status_ != nullptr) {
+    this->inverter_com_status_->publish_state(true);
+  }
 }
 
 // --- Checksum functions remain the same ---
