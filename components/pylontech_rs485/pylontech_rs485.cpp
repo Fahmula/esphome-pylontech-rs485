@@ -125,7 +125,7 @@ bool PylontechRS485::update_state_from_sensors_() {
   // Update core member variables
   this->soc_percent_ = this->soc_sensor_->state;
   this->voltage_mv_ = this->voltage_sensor_->state * 1000;
-  this->current_ca_ = this->current_sensor_->state * 100;
+  this->current_ca_ = this->current_sensor_->state * 1000;
   this->temp_deci_k_ = (this->temperature_sensor_->state + 273.15) * 10;
   
   // Update limits from their sensors for command 63
