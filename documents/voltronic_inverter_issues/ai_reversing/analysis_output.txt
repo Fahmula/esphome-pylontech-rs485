@@ -1,0 +1,68 @@
+Pylontech RS485 request inventory
+  uart_debug frames: 493
+  rx frames: 493
+  tx frames: 0
+  structurally valid: 493
+  invalid: 0
+
+Unique frames
+- 0002464F0000FD9A x83
+    line: 2089 direction: <<<
+    VER=0x00 ADR=0x02 (master group=0)
+    CID1=0x46 CID2=0x4F (Get protocol version)
+    LENGTH=0x0000 LENID=0 LCHKSUM=ok
+    CHKSUM wire=0xFD9A calc=0xFD9A ok=True
+    INFO=''
+    issues: none
+
+- 0012464F0000FD99 x82
+    line: 2176 direction: <<<
+    VER=0x00 ADR=0x12 (master group=1)
+    CID1=0x46 CID2=0x4F (Get protocol version)
+    LENGTH=0x0000 LENID=0 LCHKSUM=ok
+    CHKSUM wire=0xFD99 calc=0xFD99 ok=True
+    INFO=''
+    issues: none
+
+- 0022464F0000FD98 x82
+    line: 2154 direction: <<<
+    VER=0x00 ADR=0x22 (master group=2)
+    CID1=0x46 CID2=0x4F (Get protocol version)
+    LENGTH=0x0000 LENID=0 LCHKSUM=ok
+    CHKSUM wire=0xFD98 calc=0xFD98 ok=True
+    INFO=''
+    issues: none
+
+- 0032464F0000FD97 x82
+    line: 2138 direction: <<<
+    VER=0x00 ADR=0x32 (master group=3)
+    CID1=0x46 CID2=0x4F (Get protocol version)
+    LENGTH=0x0000 LENID=0 LCHKSUM=ok
+    CHKSUM wire=0xFD97 calc=0xFD97 ok=True
+    INFO=''
+    issues: none
+
+- 0042464F0000FD96 x82
+    line: 2121 direction: <<<
+    VER=0x00 ADR=0x42 (master group=4)
+    CID1=0x46 CID2=0x4F (Get protocol version)
+    LENGTH=0x0000 LENID=0 LCHKSUM=ok
+    CHKSUM wire=0xFD96 calc=0xFD96 ok=True
+    INFO=''
+    issues: none
+
+- 0052464F0000FD95 x82
+    line: 2102 direction: <<<
+    VER=0x00 ADR=0x52 (master group=5)
+    CID1=0x46 CID2=0x4F (Get protocol version)
+    LENGTH=0x0000 LENID=0 LCHKSUM=ok
+    CHKSUM wire=0xFD95 calc=0xFD95 ok=True
+    INFO=''
+    issues: none
+
+Component log messages
+  Ignoring unknown command: 4F x352
+  Received frame is too short. x51
+
+CID2 summary
+  0x4F x493 Get protocol version
