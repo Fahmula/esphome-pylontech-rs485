@@ -77,6 +77,7 @@ class PylontechRS485 : public Component, public uart::UARTDevice {
   // --- Helper and state functions ---
   bool update_state_from_sensors_();
   void route_frame_request_(const std::string &frame_str);
+  void handle_command_4f_();
   void handle_command_61_();
   void handle_command_62_();
   void handle_command_63_();
