@@ -134,7 +134,7 @@ SENSOR_KEYS_SCHEMA = cv.Schema(
 )
 
 # --- Main Configuration Schema ---
-CONFIG_SCHEMA = (
+CONFIG_SCHEMA = cv.ensure_list(
     cv.Schema(
         {
             cv.GenerateID(): cv.declare_id(PylontechRS485),
@@ -147,93 +147,93 @@ CONFIG_SCHEMA = (
 
 # --- Main Code Generation Function ---
 async def to_code(config):
-    # --- Standard component setup ---
-    var = cg.new_Pvariable(config[CONF_ID])
-    await cg.register_component(var, config)
-    await uart.register_uart_device(var, config)
+    for conf in config:
+        # --- Standard component setup ---
+        var = cg.new_Pvariable(conf[CONF_ID])
+        await cg.register_component(var, conf)
+        await uart.register_uart_device(var, conf)
 
-    # --- Sensor setup logic ---
-    # This maps the YAML key to the C++ setter function name.
-    SENSOR_MAP = {
-        CONF_STATE_OF_CHARGE: "set_soc_sensor",
-        CONF_VOLTAGE: "set_voltage_sensor",
-        CONF_CURRENT: "set_current_sensor",
-        CONF_TEMPERATURE: "set_temperature_sensor",
-        CONF_SOH: "set_soh_sensor",
-        CONF_CYCLE_COUNT: "set_cycle_count_sensor",
-        CONF_MAX_TEMPERATURE: "set_max_temperature_sensor",
-        CONF_MIN_TEMPERATURE: "set_min_temperature_sensor",
-        CONF_MAX_CELL_VOLTAGE: "set_max_cell_voltage_sensor",
-        CONF_MIN_CELL_VOLTAGE: "set_min_cell_voltage_sensor",
-        CONF_MOSFET_TEMPERATURE: "set_mosfet_temperature_sensor",
-        CONF_MAX_MOSFET_TEMPERATURE: "set_max_mosfet_temperature_sensor",
-        CONF_MIN_MOSFET_TEMPERATURE: "set_min_mosfet_temperature_sensor",
-        CONF_BMS_TEMPERATURE: "set_bms_temperature_sensor",
-        CONF_MAX_BMS_TEMPERATURE: "set_max_bms_temperature_sensor",
-        CONF_MIN_BMS_TEMPERATURE: "set_min_bms_temperature_sensor",
-        CONF_MAX_VOLTAGE: "set_max_voltage_sensor",
-        CONF_MIN_VOLTAGE: "set_min_voltage_sensor",
-        CONF_MAX_CHARGE_CURRENT: "set_max_charge_current_sensor",
-        CONF_MAX_DISCHARGE_CURRENT: "set_max_discharge_current_sensor",
-        # RS485 link monitoring sensors
-        CONF_INVERTER_HEARTBEAT: "set_inverter_heartbeat",
-    }
+        # --- Sensor setup logic ---
+        # This maps the YAML key to the C++ setter function name.
+        SENSOR_MAP = {
+            CONF_STATE_OF_CHARGE: "set_soc_sensor",
+            CONF_VOLTAGE: "set_voltage_sensor",
+            CONF_CURRENT: "set_current_sensor",
+            CONF_TEMPERATURE: "set_temperature_sensor",
+            CONF_SOH: "set_soh_sensor",
+            CONF_CYCLE_COUNT: "set_cycle_count_sensor",
+            CONF_MAX_TEMPERATURE: "set_max_temperature_sensor",
+            CONF_MIN_TEMPERATURE: "set_min_temperature_sensor",
+            CONF_MAX_CELL_VOLTAGE: "set_max_cell_voltage_sensor",
+            CONF_MIN_CELL_VOLTAGE: "set_min_cell_voltage_sensor",
+            CONF_MOSFET_TEMPERATURE: "set_mosfet_temperature_sensor",
+            CONF_MAX_MOSFET_TEMPERATURE: "set_max_mosfet_temperature_sensor",
+            CONF_MIN_MOSFET_TEMPERATURE: "set_min_mosfet_temperature_sensor",
+            CONF_BMS_TEMPERATURE: "set_bms_temperature_sensor",
+            CONF_MAX_BMS_TEMPERATURE: "set_max_bms_temperature_sensor",
+            CONF_MIN_BMS_TEMPERATURE: "set_min_bms_temperature_sensor",
+            CONF_MAX_VOLTAGE: "set_max_voltage_sensor",
+            CONF_MIN_VOLTAGE: "set_min_voltage_sensor",
+            CONF_MAX_CHARGE_CURRENT: "set_max_charge_current_sensor",
+            CONF_MAX_DISCHARGE_CURRENT: "set_max_discharge_current_sensor",
+            # RS485 link monitoring sensors
+            CONF_INVERTER_HEARTBEAT: "set_inverter_heartbeat",
+        }
 
-    # This maps the YAML key to the C++ setter function name for BINARY sensors.
-    BINARY_SENSOR_MAP = {
-        # Alarm Status 1
-        CONF_TOTAL_VOLTAGE_HIGH_ALARM: "set_total_voltage_high_alarm",
-        CONF_TOTAL_VOLTAGE_LOW_ALARM: "set_total_voltage_low_alarm",
-        CONF_CELL_VOLTAGE_HIGH_ALARM: "set_cell_voltage_high_alarm",
-        CONF_CELL_VOLTAGE_LOW_ALARM: "set_cell_voltage_low_alarm",
-        CONF_CELL_TEMP_HIGH_ALARM: "set_cell_temp_high_alarm",
-        CONF_CELL_TEMP_LOW_ALARM: "set_cell_temp_low_alarm",
-        CONF_MOSFET_TEMP_HIGH_ALARM: "set_mosfet_temp_high_alarm",
-        CONF_CELL_IMBALANCE_ALARM: "set_cell_imbalance_alarm",
-        # Alarm Status 2
-        CONF_CELL_TEMP_IMBALANCE_ALARM: "set_cell_temp_imbalance_alarm",
-        CONF_CHARGE_OVERCURRENT_ALARM: "set_charge_overcurrent_alarm",
-        CONF_DISCHARGE_OVERCURRENT_ALARM: "set_discharge_overcurrent_alarm",
-        # Protection Status 1
-        CONF_MODULE_OVERVOLTAGE_PROTECTION: "set_module_overvoltage_protection",
-        CONF_MODULE_UNDERVOLTAGE_PROTECTION: "set_module_undervoltage_protection",
-        CONF_CELL_OVERVOLTAGE_PROTECTION: "set_cell_overvoltage_protection",
-        CONF_CELL_UNDERVOLTAGE_PROTECTION: "set_cell_undervoltage_protection",
-        CONF_CELL_OVERTEMP_PROTECTION: "set_cell_overtemp_protection",
-        CONF_CELL_UNDERTEMP_PROTECTION: "set_cell_undertemp_protection",
-        CONF_MOSFET_OVERTEMP_PROTECTION: "set_mosfet_overtemp_protection",
-        # Protection Status 2
-        CONF_CHARGE_OVERCURRENT_PROTECTION: "set_charge_overcurrent_protection",
-        CONF_DISCHARGE_OVERCURRENT_PROTECTION: "set_discharge_overcurrent_protection",
-        CONF_SYSTEM_FAULT_PROTECTION: "set_system_fault_protection",
-        # RS485 link monitoring binary sensor
-        CONF_RS485_STATUS: "set_rs485_status",
-        # Force Charge Sensor
-        CONF_REQUESTED_FORCE_CHARGE: "set_requested_force_charge",
-    }
+        # This maps the YAML key to the C++ setter function name for BINARY sensors.
+        BINARY_SENSOR_MAP = {
+            # Alarm Status 1
+            CONF_TOTAL_VOLTAGE_HIGH_ALARM: "set_total_voltage_high_alarm",
+            CONF_TOTAL_VOLTAGE_LOW_ALARM: "set_total_voltage_low_alarm",
+            CONF_CELL_VOLTAGE_HIGH_ALARM: "set_cell_voltage_high_alarm",
+            CONF_CELL_VOLTAGE_LOW_ALARM: "set_cell_voltage_low_alarm",
+            CONF_CELL_TEMP_HIGH_ALARM: "set_cell_temp_high_alarm",
+            CONF_CELL_TEMP_LOW_ALARM: "set_cell_temp_low_alarm",
+            CONF_MOSFET_TEMP_HIGH_ALARM: "set_mosfet_temp_high_alarm",
+            CONF_CELL_IMBALANCE_ALARM: "set_cell_imbalance_alarm",
+            # Alarm Status 2
+            CONF_CELL_TEMP_IMBALANCE_ALARM: "set_cell_temp_imbalance_alarm",
+            CONF_CHARGE_OVERCURRENT_ALARM: "set_charge_overcurrent_alarm",
+            CONF_DISCHARGE_OVERCURRENT_ALARM: "set_discharge_overcurrent_alarm",
+            # Protection Status 1
+            CONF_MODULE_OVERVOLTAGE_PROTECTION: "set_module_overvoltage_protection",
+            CONF_MODULE_UNDERVOLTAGE_PROTECTION: "set_module_undervoltage_protection",
+            CONF_CELL_OVERVOLTAGE_PROTECTION: "set_cell_overvoltage_protection",
+            CONF_CELL_UNDERVOLTAGE_PROTECTION: "set_cell_undervoltage_protection",
+            CONF_CELL_OVERTEMP_PROTECTION: "set_cell_overtemp_protection",
+            CONF_CELL_UNDERTEMP_PROTECTION: "set_cell_undertemp_protection",
+            CONF_MOSFET_OVERTEMP_PROTECTION: "set_mosfet_overtemp_protection",
+            # Protection Status 2
+            CONF_CHARGE_OVERCURRENT_PROTECTION: "set_charge_overcurrent_protection",
+            CONF_DISCHARGE_OVERCURRENT_PROTECTION: "set_discharge_overcurrent_protection",
+            CONF_SYSTEM_FAULT_PROTECTION: "set_system_fault_protection",
+            # RS485 link monitoring binary sensor
+            CONF_RS485_STATUS: "set_rs485_status",
+            # Force Charge Sensor
+            CONF_REQUESTED_FORCE_CHARGE: "set_requested_force_charge",
+        }
 
-    SWITCH_MAP = {
-        CONF_HEARTBEAT_SWITCH: "set_heartbeat_switch",
-    }
+        SWITCH_MAP = {
+            CONF_HEARTBEAT_SWITCH: "set_heartbeat_switch",
+        }
 
+        # Loop through the SENSOR_MAP and generate code for sensors
+        for key, setter_name in SENSOR_MAP.items():
+            if key in conf:
+                sens = await cg.get_variable(conf[key])
+                cg.add(getattr(var, setter_name)(sens))
 
-    # Loop through the SENSOR_MAP and generate code for sensors
-    for key, setter_name in SENSOR_MAP.items():
-        if key in config:
-            sens = await cg.get_variable(config[key])
-            cg.add(getattr(var, setter_name)(sens))
+        # Loop through the BINARY_SENSOR_MAP and generate code for binary sensors
+        for key, setter_name in BINARY_SENSOR_MAP.items():
+            if key in conf:
+                sens = await cg.get_variable(conf[key])
+                cg.add(getattr(var, setter_name)(sens))
 
-    # Loop through the BINARY_SENSOR_MAP and generate code for binary sensors
-    for key, setter_name in BINARY_SENSOR_MAP.items():
-        if key in config:
-            sens = await cg.get_variable(config[key])
-            cg.add(getattr(var, setter_name)(sens))
+        # Loop through the SWITCH_MAP and generate code for switches
+        for key, setter_name in SWITCH_MAP.items():
+            if key in conf:
+                sw = await cg.get_variable(conf[key])
+                cg.add(getattr(var, setter_name)(sw))
 
-    # Loop through the SWITCH_MAP and generate code for switches
-    for key, setter_name in SWITCH_MAP.items():
-        if key in config:
-            sw = await cg.get_variable(config[key])
-            cg.add(getattr(var, setter_name)(sw))
-
-    # Set the update timeout
-    cg.add(var.set_update_timeout(config[CONF_UPDATE_TIMEOUT]))
+        # Set the update timeout
+        cg.add(var.set_update_timeout(conf[CONF_UPDATE_TIMEOUT]))
