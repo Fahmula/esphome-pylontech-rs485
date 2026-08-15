@@ -159,7 +159,9 @@ void PylontechRS485::route_frame_request_(const std::string &frame_str) {
   }
   std::string cid2 = frame_str.substr(7, 2);
 
-  if (cid2 == "61") {
+  if (cid2 == "4F") {
+    this->handle_command_4f_();
+  } else if (cid2 == "61") {
     this->handle_command_61_();
   } else if (cid2 == "62") {
     this->handle_command_62_();
@@ -168,6 +170,15 @@ void PylontechRS485::route_frame_request_(const std::string &frame_str) {
   } else {
     ESP_LOGD(TAG, "Ignoring unknown command: %s", cid2.c_str());
   }
+}
+
+void PylontechRS485::handle_command_4f_() {
+  std::string info_payload_str;
+  std::string length_field = this->calculate_length_field_(info_payload_str.length());
+  std::string frame_data = PROTOCOL_VERSION + RESPONSE_ADDRESS + "4600" + length_field + info_payload_str;
+  std::string checksum = this->calculate_checksum_(frame_data);
+  std::string full_frame = "~" + frame_data + checksum + "\r";
+  this->write_str(full_frame.c_str());
 }
 
 void PylontechRS485::handle_command_61_() {
